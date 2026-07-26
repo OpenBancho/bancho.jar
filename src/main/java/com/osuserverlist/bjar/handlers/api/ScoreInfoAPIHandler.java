@@ -39,9 +39,21 @@ public class ScoreInfoAPIHandler implements Handler {
             @OpenApiParam(name = "id", type = Integer.class, required = true, description = "Score id.")
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.ScoreInfoResponse.class) }, description = "Score with beatmap"),
-            @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid id"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Score not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.ScoreInfoResponse.class) },
+                description = "Score with beatmap"
+            ),
+            @OpenApiResponse(
+                status = "400",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Missing or invalid id"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Score not found"
+            )
         },
         path = "/api/v1/get_score_details"
     )

@@ -87,8 +87,6 @@ public class Osz2GetScoresHandler implements Handler {
                 .map(scoreEntity -> Score.fromEntity(scoreEntity, beatmap))
                 .toList();
 
-        
-
         assignRanks(scoreList);
 
         if (ownScore != null) {

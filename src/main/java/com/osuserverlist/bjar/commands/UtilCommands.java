@@ -17,11 +17,11 @@ import com.osuserverlist.bjar.packets.server.UtilServerPackets.NotificationPacke
 public class UtilCommands extends BanchoCommandHandler {
 
     private static final long MB = 1024L * 1024L;
-    
+
     @BanchoCommand(
-        name = "!alert", 
-        category = CommandCategory.MISC, 
-        description = "Alert all players with a message", 
+        name = "!alert",
+        category = CommandCategory.MISC,
+        description = "Alert all players with a message",
         requiredPrivileges = Privileges.ADMINISTRATOR
     )
     public void alert(Player sender, Session session, String[] args) {
@@ -42,9 +42,9 @@ public class UtilCommands extends BanchoCommandHandler {
     }
 
     @BanchoCommand(
-        name = "!server", 
-        category = CommandCategory.MISC, 
-        description = "Shows server information", 
+        name = "!server",
+        category = CommandCategory.MISC,
+        description = "Shows server information",
         requiredPrivileges = Privileges.ADMINISTRATOR
     )
     public void serverInfo(Player sender, Session session, String[] args) {

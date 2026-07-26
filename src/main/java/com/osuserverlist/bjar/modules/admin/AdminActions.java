@@ -39,9 +39,6 @@ public final class AdminActions {
 
     private static final String LEADERBOARD_KEY = "bjar:leaderboard:";
 
-    private AdminActions() {
-    }
-
     // ------------------------------------------------------------------
     // restrict / unrestrict
     // ------------------------------------------------------------------

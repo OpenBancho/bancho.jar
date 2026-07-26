@@ -102,7 +102,7 @@ public class ConfigModels {
     @Data
     public static class PresenceConfiguration {
         private List<PresenceInfo> presenceInfos = List.of(new PresenceInfo(ActionStatus.EDITING, "bancho.jars source code"), new PresenceInfo(ActionStatus.WATCHING, "some gameplay"), new PresenceInfo(ActionStatus.TESTING, "some beatmaps"), new PresenceInfo(ActionStatus.SUBMITTING, "some beatmaps"));
-    
+
         @AllArgsConstructor
         @NoArgsConstructor
         @Data

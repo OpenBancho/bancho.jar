@@ -43,7 +43,7 @@ public class UtilServerPackets {
         }
     }
 
-    @PacketHandler(GetAttentionPacket.class) 
+    @PacketHandler(GetAttentionPacket.class)
     public static final class GetAttentionHandler implements ServerPacketHandler<GetAttentionPacket> {
         @Override
         public void write(GetAttentionPacket packet, BanchoPacketWriter writer, Player player) {

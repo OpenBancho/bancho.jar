@@ -12,9 +12,6 @@ import io.ebean.DB;
  */
 public final class ApiProfile {
 
-    private ApiProfile() {
-    }
-
     /**
      * Global pp rank, counting only unrestricted accounts.
      *

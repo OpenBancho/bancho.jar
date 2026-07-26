@@ -682,7 +682,7 @@ public class MultiplayerPackets {
             // it return to an idle state.
             match.setInProgress(false);
             match.enqueUpdate();
-            
+
         }
 
         return true;

@@ -41,11 +41,23 @@ public class SearchPlayersAPIHandler implements Handler {
         tags = { "Users" },
         queryParams = {
             @OpenApiParam(name = "q", type = String.class, description = "Name fragment to search for."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedSearchPlayers.class) }, description = "Paginated list of matching players")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedSearchPlayers.class) },
+                description = "Paginated list of matching players"
+            )
         },
         path = "/api/v1/search_players"
     )

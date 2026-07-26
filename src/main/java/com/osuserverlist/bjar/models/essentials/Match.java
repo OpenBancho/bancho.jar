@@ -26,7 +26,7 @@ public class Match {
 
     short matchId;
     boolean inProgress;
-    
+
     int mods;
     int mode;
 

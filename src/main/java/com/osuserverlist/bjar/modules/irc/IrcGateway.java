@@ -11,9 +11,6 @@ public final class IrcGateway {
 
     private static volatile IrcServer server;
 
-    private IrcGateway() {
-    }
-
     public static void setServer(IrcServer ircServer) {
         server = ircServer;
     }

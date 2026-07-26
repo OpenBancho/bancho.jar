@@ -37,9 +37,6 @@ public final class AdminPrivileges {
         ALIASES.put("developer", Privileges.DEVELOPER);
     }
 
-    private AdminPrivileges() {
-    }
-
     /**
      * Resolves a privilege name sent by a client.
      *

@@ -71,9 +71,6 @@ public final class TokenStore {
 
     private static volatile Settings settings;
 
-    private TokenStore() {
-    }
-
     /** Token lifetimes, read once from the environment. */
     public static final class Settings {
         private final long accessTtlSeconds;

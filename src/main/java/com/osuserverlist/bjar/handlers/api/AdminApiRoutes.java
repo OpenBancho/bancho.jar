@@ -12,12 +12,13 @@ import com.osuserverlist.bjar.models.osu.Privileges;
 import com.osuserverlist.bjar.modules.admin.AdminActions;
 import com.osuserverlist.bjar.modules.admin.AdminPrivileges;
 import com.osuserverlist.bjar.modules.api.OAuthToken;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -38,9 +39,6 @@ import io.javalin.openapi.OpenApiResponse;
  */
 public final class AdminApiRoutes {
 
-    private AdminApiRoutes() {
-    }
-
     // ------------------------------------------------------------------
     // restrict / unrestrict
     // ------------------------------------------------------------------
@@ -48,7 +46,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/restrict */
     @Host("api.")
     @Path("/api/v1/admin/restrict")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class RestrictHandler implements Handler {
 
         @Override
@@ -56,17 +54,46 @@ public final class AdminApiRoutes {
             summary = "Restrict a player",
             description = "Restricts an account and kicks it offline. Requires the moderation scope and the MODERATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.RestrictRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.RestrictRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/restrict",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -104,7 +131,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/unrestrict */
     @Host("api.")
     @Path("/api/v1/admin/unrestrict")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class UnrestrictHandler implements Handler {
 
         @Override
@@ -112,17 +139,46 @@ public final class AdminApiRoutes {
             summary = "Unrestrict a player",
             description = "Lifts a restriction. Requires the moderation scope and the MODERATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.RestrictRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.RestrictRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/unrestrict",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -159,7 +215,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/wipe */
     @Host("api.")
     @Path("/api/v1/admin/wipe")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class WipeHandler implements Handler {
 
         @Override
@@ -167,17 +223,43 @@ public final class AdminApiRoutes {
             summary = "Wipe a player",
             description = "Deletes every score and resets the stats of one game mode. Requires the admin scope and the ADMINISTRATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.WipeRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.WipeRequest.class) }),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/wipe",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -224,7 +306,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/alert */
     @Host("api.")
     @Path("/api/v1/admin/alert")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class AlertHandler implements Handler {
 
         @Override
@@ -232,16 +314,38 @@ public final class AdminApiRoutes {
             summary = "Alert everyone online",
             description = "Sends a notification to every online player and answers with the number of recipients. Requires the moderation scope and the MODERATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.AlertRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.AlertRequest.class) }),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.AlertResponse.class) }, description = "Delivered"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.AlertResponse.class) },
+                    description = "Delivered"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                )
             },
             path = "/api/v1/admin/alert",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -276,7 +380,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/donator */
     @Host("api.")
     @Path("/api/v1/admin/donator")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class DonatorHandler implements Handler {
 
         @Override
@@ -284,17 +388,46 @@ public final class AdminApiRoutes {
             summary = "Grant or remove supporter",
             description = "Sets the supporter period of an account and answers with the resulting donor_end timestamp. Requires the admin scope and the ADMINISTRATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.DonatorRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.DonatorRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.DonatorResponse.class) }, description = "Updated"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.DonatorResponse.class) },
+                    description = "Updated"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/donator",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -339,7 +472,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/privileges/add */
     @Host("api.")
     @Path("/api/v1/admin/privileges/add")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class AddPrivilegesHandler implements Handler {
 
         @Override
@@ -347,17 +480,46 @@ public final class AdminApiRoutes {
             summary = "Add privileges",
             description = "Adds privileges by name and answers with the resulting bitmask. Requires the admin scope and the ADMINISTRATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.PrivilegesRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.PrivilegesRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PrivilegesResponse.class) }, description = "Updated"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.PrivilegesResponse.class) },
+                    description = "Updated"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/privileges/add",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             changePrivileges(ctx, true);
@@ -367,7 +529,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/privileges/remove */
     @Host("api.")
     @Path("/api/v1/admin/privileges/remove")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class RemovePrivilegesHandler implements Handler {
 
         @Override
@@ -375,17 +537,46 @@ public final class AdminApiRoutes {
             summary = "Remove privileges",
             description = "Removes privileges by name and answers with the resulting bitmask. Requires the admin scope and the ADMINISTRATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.PrivilegesRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.PrivilegesRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PrivilegesResponse.class) }, description = "Updated"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.PrivilegesResponse.class) },
+                    description = "Updated"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/privileges/remove",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             changePrivileges(ctx, false);
@@ -452,7 +643,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/beatmap/status */
     @Host("api.")
     @Path("/api/v1/admin/beatmap/status")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class BeatmapStatusHandler implements Handler {
 
         @Override
@@ -460,17 +651,46 @@ public final class AdminApiRoutes {
             summary = "Set a beatmap status",
             description = "Ranks, unranks or loves a beatmap. Requires the beatmaps scope and the NOMINATOR privilege; moderators do not get this by default.",
             tags = { "Beatmaps" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.BeatmapStatusRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.BeatmapStatusRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such beatmap")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such beatmap"
+                )
             },
             path = "/api/v1/admin/beatmap/status",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -514,7 +734,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/user/country */
     @Host("api.")
     @Path("/api/v1/admin/user/country")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class CountryHandler implements Handler {
 
         @Override
@@ -522,17 +742,46 @@ public final class AdminApiRoutes {
             summary = "Change a country",
             description = "Overrides the country of an account. Requires the moderation scope and the MODERATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.CountryRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.CountryRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/user/country",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);
@@ -570,7 +819,7 @@ public final class AdminApiRoutes {
     /** POST /api/v1/admin/user/name */
     @Host("api.")
     @Path("/api/v1/admin/user/name")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class NameHandler implements Handler {
 
         /** Matches the in-game registration limits. */
@@ -582,17 +831,43 @@ public final class AdminApiRoutes {
             summary = "Rename a player",
             description = "Renames an account. Requires the admin scope and the ADMINISTRATOR privilege.",
             tags = { "Administration" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.NameRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.NameRequest.class) }),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "No such user")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "No such user"
+                )
             },
             path = "/api/v1/admin/user/name",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken session = ApiAuth.require(ctx);

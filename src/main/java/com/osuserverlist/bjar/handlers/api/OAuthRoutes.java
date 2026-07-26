@@ -16,13 +16,14 @@ import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.database.UserEntity;
 import com.osuserverlist.bjar.modules.api.OAuthToken;
 import com.osuserverlist.bjar.modules.api.TokenStore;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 import com.osuserverlist.bjar.repos.UserRepository;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -48,13 +49,10 @@ public final class OAuthRoutes {
     private static final Logger logger = LoggerFactory.getLogger("OAuth");
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private OAuthRoutes() {
-    }
-
     /** POST /api/v1/oauth/token */
     @Host("api.")
     @Path("/api/v1/oauth/token")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class TokenHandler implements Handler {
 
         @Override
@@ -62,15 +60,32 @@ public final class OAuthRoutes {
             summary = "Issue or refresh tokens",
             description = "OAuth2 token endpoint. Supports the password and refresh_token grants and accepts a form encoded or JSON body. The pair is also set as the bjar_access and bjar_refresh cookies. Refresh tokens rotate: reusing one revokes the whole chain.",
             tags = { "OAuth" },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.TokenRequest.class) }),
+            requestBody =
+                @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.TokenRequest.class) }),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.TokenResponse.class) }, description = "A new access and refresh token pair"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.OAuthErrorResponse.class) }, description = "invalid_request or unsupported_grant_type"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.OAuthErrorResponse.class) }, description = "invalid_grant: wrong credentials, or an invalid, expired or already used refresh token"),
-                @OpenApiResponse(status = "503", content = { @OpenApiContent(from = ApiDto.OAuthErrorResponse.class) }, description = "temporarily_unavailable: the session store is unreachable")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.TokenResponse.class) },
+                    description = "A new access and refresh token pair"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.OAuthErrorResponse.class) },
+                    description = "invalid_request or unsupported_grant_type"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.OAuthErrorResponse.class) },
+                    description = "invalid_grant: wrong credentials, or an invalid, expired or already used refresh token"
+                ),
+                @OpenApiResponse(
+                    status = "503",
+                    content = { @OpenApiContent(from = ApiDto.OAuthErrorResponse.class) },
+                    description = "temporarily_unavailable: the session store is unreachable"
+                )
             },
             path = "/api/v1/oauth/token",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             Params params = Params.of(ctx);
@@ -214,7 +229,7 @@ public final class OAuthRoutes {
     /** POST /api/v1/oauth/revoke — RFC 7009 style revocation, used as logout. */
     @Host("api.")
     @Path("/api/v1/oauth/revoke")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class RevokeHandler implements Handler {
 
         @Override
@@ -222,12 +237,17 @@ public final class OAuthRoutes {
             summary = "Revoke tokens (log out)",
             description = "Revokes the given token, or, when no token is supplied, whatever the cookies carry. Revoking a refresh token takes the whole chain down. Both cookies are cleared. As in RFC 7009 the answer is always 200.",
             tags = { "OAuth" },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.RevokeRequest.class) }),
+            requestBody =
+                @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.RevokeRequest.class) }),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Revoked, even when the token was already unknown")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Revoked, even when the token was already unknown"
+                )
             },
             path = "/api/v1/oauth/revoke",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             Params params = Params.of(ctx);
@@ -265,7 +285,7 @@ public final class OAuthRoutes {
     /** GET /api/v1/oauth/userinfo — who the current access token belongs to. */
     @Host("api.")
     @Path("/api/v1/oauth/userinfo")
-    @HttpMethod("GET")
+    @WebEngine.HttpMethod("GET")
     public static class UserInfoHandler implements Handler {
 
         @Override
@@ -273,13 +293,26 @@ public final class OAuthRoutes {
             summary = "Token owner",
             description = "Who the current access token belongs to, plus its scope, client and expiry.",
             tags = { "OAuth" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.UserInfoResponse.class) }, description = "The token owner"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.UserInfoResponse.class) },
+                    description = "The token owner"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                )
             },
             path = "/api/v1/oauth/userinfo",
-            methods = io.javalin.openapi.HttpMethod.GET
+            methods = HttpMethod.GET
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken token = ApiAuth.require(ctx);

@@ -15,9 +15,6 @@ import lombok.Data;
  */
 public final class OsuFileParser {
 
-    private OsuFileParser() {
-    }
-
     @Data
     public static class ParsedBeatmap {
         private long beatmapId = 0;

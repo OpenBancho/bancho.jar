@@ -38,11 +38,23 @@ public class OnlineAPIHandler implements Handler {
         description = "Players currently online (bots and auxiliary tournament sessions excluded, deduplicated by id).",
         tags = { "Server" },
         queryParams = {
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedOnline.class) }, description = "Paginated list of online players")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedOnline.class) },
+                description = "Paginated list of online players"
+            )
         },
         path = "/api/v1/online"
     )

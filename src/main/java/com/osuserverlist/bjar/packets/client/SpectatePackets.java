@@ -18,7 +18,7 @@ import com.osuserverlist.bjar.packets.server.ChatServerPackets.ChannelRevokedPac
 import com.osuserverlist.bjar.packets.server.SpectateServerPackets.*;
 
 public class SpectatePackets {
-    
+
     @ClientPacket(ClientPackets.SPECTATE_FRAMES)
     public boolean spectateFrames(BanchoPacket packet, BanchoPacketReader reader, Player player) throws IOException {
         ReplayFrameBundle frames = reader.readReplayFrameBundle();

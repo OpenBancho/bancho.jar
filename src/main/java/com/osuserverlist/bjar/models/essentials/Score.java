@@ -108,7 +108,6 @@ public class Score {
         return (int) data[17].chars().filter(c -> c == ' ').count() & ~4;
     }
 
-
     public static String buildScoreWebString(Score s, long scoreId, int submitted) {
         return "\n" + s.getId() + "|" + s.getUsername() + "|" + s.getScore() + "|" + s.getMax_combo() + "|"
                 + s.getN50() + "|" + s.getN100() + "|" + s.getN300() + "|" + s.getNmiss() + "|" + s.getNkatu() + "|"

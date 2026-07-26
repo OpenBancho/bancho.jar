@@ -17,7 +17,7 @@ import com.osuserverlist.bjar.repos.UserRepository;
 public class UserUtilPackets {
 
     private static final Logger logger = LoggerFactory.getLogger(UserUtilPackets.class);
-    
+
     @ClientPacket(ClientPackets.PING)
     public boolean ping(BanchoPacket packet, BanchoPacketReader reader, Player player) {
         player.setLastPing(System.currentTimeMillis());
@@ -45,7 +45,7 @@ public class UserUtilPackets {
             UserEntity userTargetEntity = UserRepository.findById(userId);
             RelationshipRepository.addFriend(userEntity, userTargetEntity);
         });
-        
+
         return true;
     }
 
@@ -66,7 +66,7 @@ public class UserUtilPackets {
         return true;
     }
 
-    @ClientPacket(ClientPackets.UNHANDLED_PACKET) 
+    @ClientPacket(ClientPackets.UNHANDLED_PACKET)
     public boolean handleUnhandledPacket(BanchoPacket packet, BanchoPacketReader reader, Player player) {
         logger.warn("Unhandled packet: " + reader.getCurrentPacketId() + " (" + packet.type.name() + ")");
         return true;

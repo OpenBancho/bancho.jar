@@ -88,7 +88,6 @@ public class AdministationCommands extends BanchoCommandHandler {
             return;
         }
 
-   
         applyPrivilegeChange(session, username, privilege, grant);
     }
 
@@ -150,7 +149,6 @@ public class AdministationCommands extends BanchoCommandHandler {
 
         int supporterExpiry = (int) (System.currentTimeMillis() / 1000L) + durationSeconds;
 
-        
         applySupporterChange(session, username, true, durationSeconds, supporterExpiry);
     }
 
@@ -163,7 +161,7 @@ public class AdministationCommands extends BanchoCommandHandler {
         String username = args[0];
 
         applySupporterChange(session, username, false, 0, 0);
-   
+
     }
 
     private void applySupporterChange(Session session, String username, boolean grant, int durationSeconds, int supporterExpiry) {
@@ -198,7 +196,7 @@ public class AdministationCommands extends BanchoCommandHandler {
             user.setDonorEnd(supporterExpiry);
             user.setPrivileges(updatedPrivileges);
             UserRepository.save(user);
-            
+
             userId = user.getId();
         }
 

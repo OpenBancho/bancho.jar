@@ -127,7 +127,7 @@ public class App {
         Runnable shutdownHook = () -> {
             server.stop();
         };
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownHook));
     }
 }

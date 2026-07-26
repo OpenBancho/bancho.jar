@@ -34,7 +34,7 @@ public class ChatPackets {
             logger.warn("Player {} tried to join a not existing channel", player.toString());
             return true;
         }
-        
+
         if(channel.getReadPriv() > player.getServerPrivileges()) {
             logger.warn("Player {} tried to join channel {} without sufficient privileges", player.toString(), channelName);
             return true;
@@ -80,7 +80,7 @@ public class ChatPackets {
        reader.readString(); // senderName
         String message = reader.readString();
         String target = reader.readString();
-        
+
         Channel channel = resolveChannel(player, target);
         if (channel == null) {
             logger.warn("Player {} sent a message to a non-existing channel {}", player, target);

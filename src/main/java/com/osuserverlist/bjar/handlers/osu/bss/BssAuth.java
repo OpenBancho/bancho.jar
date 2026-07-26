@@ -21,9 +21,6 @@ import io.javalin.http.Context;
  */
 final class BssAuth {
 
-    private BssAuth() {
-    }
-
     /**
      * @param username    osu! username, parameter {@code u}.
      * @param passwordMd5 MD5 of the password, parameter {@code h}.

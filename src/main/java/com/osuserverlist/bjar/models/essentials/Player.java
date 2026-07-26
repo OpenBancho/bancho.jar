@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(of = "id")
 public class Player {
-    
+
     public Player(int id, boolean isBot, String osuToken) {
         this.id = id;
         this.isBot = isBot;
@@ -43,7 +43,7 @@ public class Player {
     private Set<Integer> friends = ConcurrentHashMap.newKeySet();
     private UserEntity entity = null;
     private OsuVersion osuVersion = null;
-    
+
     private long lastPing = System.currentTimeMillis();
     private Player spectating = null;
     private Match match = null;

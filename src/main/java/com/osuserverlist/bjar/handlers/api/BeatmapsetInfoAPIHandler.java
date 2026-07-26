@@ -8,12 +8,13 @@ import org.jetbrains.annotations.NotNull;
 import com.osuserverlist.bjar.models.api.ApiBeatmapsets;
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiPagination;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -28,7 +29,7 @@ import io.javalin.openapi.OpenApiResponse;
  */
 @Host("api.")
 @Path("/api/v1/get_beatmapset")
-@HttpMethod("GET")
+@WebEngine.HttpMethod("GET")
 public class BeatmapsetInfoAPIHandler implements Handler {
 
     @Override
@@ -40,12 +41,24 @@ public class BeatmapsetInfoAPIHandler implements Handler {
             @OpenApiParam(name = "id", type = Integer.class, description = "Beatmap set id (required).")
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.BeatmapsetResponse.class) }, description = "The beatmap set"),
-            @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or malformed id"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Beatmap set not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.BeatmapsetResponse.class) },
+                description = "The beatmap set"
+            ),
+            @OpenApiResponse(
+                status = "400",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Missing or malformed id"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Beatmap set not found"
+            )
         },
         path = "/api/v1/get_beatmapset",
-        methods = io.javalin.openapi.HttpMethod.GET
+        methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
         String raw = ctx.queryParam("id");

@@ -22,9 +22,6 @@ import com.osuserverlist.bjar.repos.UserRepository;
  */
 public final class OsuWebAuth {
 
-    private OsuWebAuth() {
-    }
-
     /**
      * Resolves the online player behind a username / password-md5 pair.
      *

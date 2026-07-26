@@ -65,12 +65,12 @@ public class UserServerPackets {
         public void write(UserPresencePacket packet, BanchoPacketWriter writer, Player player) {
             Player target = packet.getPlayer();
             if (target == null) return;
-        
+
             writer.startPacket(ServerPackets.USER_PRESENCE);
             writer.writeInt(target.getId()); // User ID (4 bytes)
             writer.writeString(target.getUsername()); // Username (null-terminated string)
             writer.writeByte((byte) (target.getTimezone() + 24)); // Timezone (1 byte)
-                                                                                                   // 
+                                                                                                   //
             writer.writeByte((byte) target.getCountry()); // Country ID (1 byte)
             writer.writeByte((byte) (target.getClientPrivileges() | (target.getGameMode()) << 5)); // Permissions | Mode << 5 (1 byte)
             writer.writeFloat(target.getLongitude()); // Longitude (4 bytes)

@@ -179,7 +179,6 @@ public class IngameRegistrationHandler implements Handler {
             userEntity.setCreationTime((int)(System.currentTimeMillis() / 1000));
             UserRepository.save(userEntity);
 
-           
             if (userEntity.getId() == null) {
                 logger.error("Failed to retrieve last insert ID for user: {}", username);
                 addError(errors, "database", "An error occurred while creating the account. Please try again.");
@@ -189,7 +188,7 @@ public class IngameRegistrationHandler implements Handler {
             bootstrapNewUser(userEntity);
 
             logger.info("Registered new user: <{}>({})", username, userEntity.getId());
-       
+
     }
 
     /**

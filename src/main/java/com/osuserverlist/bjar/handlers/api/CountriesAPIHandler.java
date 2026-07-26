@@ -57,7 +57,11 @@ public class CountriesAPIHandler implements Handler {
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0).")
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.CountriesResponse.class) }, description = "Country list")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.CountriesResponse.class) },
+                description = "Country list"
+            )
         },
         path = "/api/v1/get_countries"
     )

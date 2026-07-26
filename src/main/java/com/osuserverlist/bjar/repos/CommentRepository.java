@@ -9,9 +9,6 @@ import io.ebean.DB;
 
 public final class CommentRepository {
 
-    private CommentRepository() {
-    }
-
     /**
      * Every comment the client should draw over one replay: the ones left on that
      * replay, on the difficulty being played, and on the song as a whole.

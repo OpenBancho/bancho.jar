@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import com.osuserverlist.bjar.models.api.ApiBeatmapsets;
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiPagination;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.ebean.DB;
@@ -19,6 +19,7 @@ import io.ebean.SqlQuery;
 import io.ebean.SqlRow;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -37,29 +38,60 @@ import io.javalin.openapi.OpenApiResponse;
  */
 @Host("api.")
 @Path("/api/v1/search_beatmapsets")
-@HttpMethod("GET")
+@WebEngine.HttpMethod("GET")
 public class SearchBeatmapsetsAPIHandler implements Handler {
 
     @Override
     @OpenApi(
         summary = "Search beatmap sets",
-        description = "Searches the known beatmap sets by artist, title, creator or difficulty name. "
-                + "One result is one set and carries all of its difficulties.",
+        description = "Searches the known beatmap sets by artist, title, creator or difficulty name. " + "One result is one set and carries all of its difficulties.",
         tags = { "Beatmaps" },
         queryParams = {
-            @OpenApiParam(name = "q", type = String.class, description = "Free text, matched against artist, title, creator and difficulty name."),
-            @OpenApiParam(name = "status", type = Integer.class, description = "Ranked status filter (-2 graveyard, -1 WIP, 0 pending, 1 ranked, 2 approved, 3 qualified, 4 loved)."),
-            @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode filter (0 osu!, 1 taiko, 2 catch, 3 mania)."),
-            @OpenApiParam(name = "server", type = String.class, description = "local for sets hosted on this server, osu for mirrored sets. Omit for both."),
-            @OpenApiParam(name = "sort", type = String.class, description = "updated (default), plays, difficulty or title."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "q",
+                type = String.class,
+                description = "Free text, matched against artist, title, creator and difficulty name."
+            ),
+            @OpenApiParam(
+                name = "status",
+                type = Integer.class,
+                description = "Ranked status filter (-2 graveyard, -1 WIP, 0 pending, 1 ranked, 2 approved, 3 qualified, 4 loved)."
+            ),
+            @OpenApiParam(
+                name = "mode",
+                type = Integer.class,
+                description = "Game mode filter (0 osu!, 1 taiko, 2 catch, 3 mania)."
+            ),
+            @OpenApiParam(
+                name = "server",
+                type = String.class,
+                description = "local for sets hosted on this server, osu for mirrored sets. Omit for both."
+            ),
+            @OpenApiParam(
+                name = "sort",
+                type = String.class,
+                description = "updated (default), plays, difficulty or title."
+            ),
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedBeatmapsetSearch.class) }, description = "Paginated list of beatmap sets")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedBeatmapsetSearch.class) },
+                description = "Paginated list of beatmap sets"
+            )
         },
         path = "/api/v1/search_beatmapsets",
-        methods = io.javalin.openapi.HttpMethod.GET
+        methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
         int offset = ApiPagination.offset(ctx);

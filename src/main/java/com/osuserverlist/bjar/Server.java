@@ -64,7 +64,6 @@ public class Server {
         executor.scheduleAtFixedRate(new PlayerCleanupTask(), 0, 60, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(new SendChannelInfoTask(), 0, 8, TimeUnit.SECONDS);
 
-    
         Player botPlayer = playerManager.getBotPlayer(1);
 
         playerManager.add(botPlayer);
@@ -74,7 +73,6 @@ public class Server {
 
         channelManager.populate();
         achievementManager.populate();
-
 
         Commands.registerAnnotatedHandlers("com.osuserverlist.bjar.commands");
 

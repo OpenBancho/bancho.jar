@@ -92,7 +92,7 @@ public class Commands {
 
         String[] args = new String[command.length - 1];
         System.arraycopy(command, 1, args, 0, args.length);
-        
+
         commandInfo.handler.handle(sender, session, args);
     }
 

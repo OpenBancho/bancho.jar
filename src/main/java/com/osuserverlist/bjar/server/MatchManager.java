@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class MatchManager {
         return matchHostMap.get(Integer.valueOf(hostId));
     }
 
-    public Match getByFilter(java.util.function.Predicate<Match> filter) {
+    public Match getByFilter(Predicate<Match> filter) {
         return matchIdMap.values().stream().filter(filter).findFirst().orElse(null);
     }
 

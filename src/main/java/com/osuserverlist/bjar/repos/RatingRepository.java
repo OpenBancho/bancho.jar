@@ -10,9 +10,6 @@ import io.ebean.DB;
 
 public final class RatingRepository {
 
-    private RatingRepository() {
-    }
-
     public static RatingEntity find(int userId, String mapMd5) {
         return DB.find(RatingEntity.class)
                 .where()

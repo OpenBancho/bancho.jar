@@ -14,14 +14,15 @@ import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.UserEntity;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.ebean.DB;
 import io.ebean.SqlRow;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -37,7 +38,7 @@ import io.javalin.openapi.OpenApiResponse;
  */
 @Host("api.")
 @Path("/api/v1/get_player_playcounts")
-@HttpMethod("GET")
+@WebEngine.HttpMethod("GET")
 public class PlayerPlaycountsAPIHandler implements Handler {
 
     private static final DateTimeFormatter MONTH = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -54,14 +55,26 @@ public class PlayerPlaycountsAPIHandler implements Handler {
             @OpenApiParam(name = "id", type = Integer.class, description = "Player id (id or name required)."),
             @OpenApiParam(name = "name", type = String.class, description = "Player name (id or name required)."),
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0)."),
-            @OpenApiParam(name = "months", type = Integer.class, description = "How many months back to report, 1-36 (default 12).")
+            @OpenApiParam(
+                name = "months",
+                type = Integer.class,
+                description = "How many months back to report, 1-36 (default 12)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PlaycountsResponse.class) }, description = "Plays per month"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Player not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PlaycountsResponse.class) },
+                description = "Plays per month"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Player not found"
+            )
         },
         path = "/api/v1/get_player_playcounts",
-        methods = io.javalin.openapi.HttpMethod.GET
+        methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
         int mode = ApiPagination.intParam(ctx, "mode", 0);

@@ -10,9 +10,6 @@ import io.ebean.DB;
 
 public final class FavouriteRepository {
 
-    private FavouriteRepository() {
-    }
-
     public static List<FavouriteEntity> findByUser(int userId) {
         return DB.find(FavouriteEntity.class)
                 .where()

@@ -59,7 +59,6 @@ public class OsuUploadScreenshotHandler implements Handler {
                 bytes[bytes.length - 2] == (byte) 0xFF &&
                 bytes[bytes.length - 1] == (byte) 0xD9;
 
-
         String extension;
         if (isPng) {
             extension = "png";

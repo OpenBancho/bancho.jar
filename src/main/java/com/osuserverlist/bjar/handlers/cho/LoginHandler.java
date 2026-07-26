@@ -106,7 +106,7 @@ public class LoginHandler {
 
         player.sendPacket(new UserPresencePacket(player));
         player.sendPacket(new UserStatsPacket(player));
-        
+
         joinAvailableChannels(server, player);
 
         player.sendPacket(new ChannelInfoEndPacket());

@@ -14,7 +14,7 @@ public enum GameMode {
     AUTOPILOT_OSU(8),
     AUTOPILOT_TAIKO(9),
     AUTOPILOT_CATCH(10),
-    AUTOPILOT_MANIA(11); 
+    AUTOPILOT_MANIA(11);
 
     private final int value;
 
@@ -80,6 +80,5 @@ public enum GameMode {
                 throw new IllegalArgumentException("Invalid game mode: " + mode);
         }
     }
-
 
 }

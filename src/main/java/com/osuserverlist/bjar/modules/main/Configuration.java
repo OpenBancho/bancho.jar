@@ -11,8 +11,6 @@ public final class Configuration {
     private static final Toml TOML = new Toml();
     private static final TomlWriter WRITER = new TomlWriter();
 
-    private Configuration() {}
-
     public static <T> T load(String path, Class<T> clazz, Supplier<T> defaults) {
         File file = new File(path);
 

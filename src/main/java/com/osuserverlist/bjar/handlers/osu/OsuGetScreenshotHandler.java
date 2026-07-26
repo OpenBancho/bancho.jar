@@ -1,21 +1,22 @@
 package com.osuserverlist.bjar.handlers.osu;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
-import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 
 @Host("osu.")
-@Path("/ss/{file}")
+@WebEngine.Path("/ss/{file}")
 @HttpMethod("GET")
 public class OsuGetScreenshotHandler implements Handler {
-    
+
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
         String filename = ctx.pathParam("file");
@@ -24,8 +25,8 @@ public class OsuGetScreenshotHandler implements Handler {
             return;
         }
 
-        java.nio.file.Path screenshotPath = java.nio.file.Path.of("data/ss").resolve(filename);
-        if (!java.nio.file.Files.exists(screenshotPath)) {
+        Path screenshotPath = Path.of("data/ss").resolve(filename);
+        if (!Files.exists(screenshotPath)) {
             ctx.status(404).result("Screenshot not found.");
             return;
         }
@@ -41,7 +42,7 @@ public class OsuGetScreenshotHandler implements Handler {
         }
 
         ctx.contentType(contentType);
-        ctx.result(Files.readAllBytes(screenshotPath));        
+        ctx.result(Files.readAllBytes(screenshotPath));
     }
 
 }

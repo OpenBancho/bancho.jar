@@ -12,9 +12,6 @@ import io.ebean.DB;
  */
 public final class MailRepository {
 
-    private MailRepository() {
-    }
-
     /**
      * Marks the conversation with one sender as read.
      *

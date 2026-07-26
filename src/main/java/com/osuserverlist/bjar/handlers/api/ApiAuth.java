@@ -43,9 +43,6 @@ public final class ApiAuth {
     /** Acting on the server itself: handing out rights, wiping data, renaming accounts. */
     public static final String SCOPE_ADMIN = "admin";
 
-    private ApiAuth() {
-    }
-
     /** Extracts the access token from the Authorization header, or the access cookie. */
     public static String bearer(Context ctx) {
         String header = ctx.header("Authorization");

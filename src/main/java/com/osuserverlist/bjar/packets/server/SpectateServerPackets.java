@@ -10,7 +10,7 @@ import com.osuserverlist.bjar.modules.packets.ServerPacketEngine.ServerPackets;
 import lombok.Value;
 
 public class SpectateServerPackets {
-    
+
     @Value
     public static class CantSpectatePacket implements ServerPacket {
         private int id;

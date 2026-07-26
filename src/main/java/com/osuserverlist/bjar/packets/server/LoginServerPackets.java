@@ -25,7 +25,7 @@ public class LoginServerPackets {
     public static class ProtocolVersionPacket implements ServerPacket { }
 
     @Value
-    public static class PrivilegesPacket implements ServerPacket { 
+    public static class PrivilegesPacket implements ServerPacket {
         private int privs;
     }
 

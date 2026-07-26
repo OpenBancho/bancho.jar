@@ -47,5 +47,5 @@ public class MapsetRepository {
                     DB.save(mapset);
                 });
     }
-    
+
 }

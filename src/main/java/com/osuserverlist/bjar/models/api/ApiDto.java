@@ -15,9 +15,6 @@ import lombok.Data;
  */
 public final class ApiDto {
 
-    private ApiDto() {
-    }
-
     // ----- item schemas --------------------------------------------------
 
     @Data
@@ -281,7 +278,7 @@ public final class ApiDto {
     }
 
     // ----- scalar (non-paginated) responses -----------------------------#
-    
+
     @Data
     public static class PlayerInfoResponse {
         private String status;

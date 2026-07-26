@@ -21,7 +21,7 @@ public class OsuGetSeasonalHandler implements Handler {
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
         ctx.contentType("application/json");
-        
+
         List<String> seasonalBgs = App.server.config.getSeasonalBackgrounds();
 
         if (seasonalBgs == null || seasonalBgs.isEmpty()) {

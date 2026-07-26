@@ -8,12 +8,8 @@ import com.osuserverlist.bjar.models.ConfigModels.PresenceConfiguration;
 import com.osuserverlist.bjar.models.ConfigModels.PresenceConfiguration.PresenceInfo;
 
 public class BotPresenceTask implements Runnable {
-    
-    private final PresenceConfiguration config;
 
-    public BotPresenceTask() {
-        config = PresenceConfiguration.load();
-    }
+    private final PresenceConfiguration config = PresenceConfiguration.load();
 
     @Override
     public void run() {

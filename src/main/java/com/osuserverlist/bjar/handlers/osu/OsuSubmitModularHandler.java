@@ -220,7 +220,7 @@ public class OsuSubmitModularHandler implements Handler {
 
         // Weighted PP: only meaningful when this is a new personal best.
         // Using status=1 is safe here because we just finished demoting the old PB.
-        
+
         double totalPp = 0.0;
         if (isPersonalBest && s.isPassed()) {
             totalPp = ScoreRepository.calculateWeightedPp(p.getId(), realGameMode.getValue());

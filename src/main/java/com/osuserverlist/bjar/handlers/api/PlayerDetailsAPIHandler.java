@@ -43,8 +43,16 @@ public class PlayerDetailsAPIHandler implements Handler {
             @OpenApiParam(name = "scope", type = String.class, description = "'info', 'stats', or 'all' (default).")
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PlayerInfoResponse.class) }, description = "Player profile and stats"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Player not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PlayerInfoResponse.class) },
+                description = "Player profile and stats"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Player not found"
+            )
         },
         path = "/api/v1/get_player_details"
     )

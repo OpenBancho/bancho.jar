@@ -2,9 +2,6 @@ package com.osuserverlist.bjar.models.osu;
 
 public final class AntiCheatFlags {
 
-    private AntiCheatFlags() {
-    }
-
     public static final class ClientFlags {
         /** No flags sent. */
         public static final int CLEAN = 0;

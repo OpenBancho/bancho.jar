@@ -13,8 +13,8 @@ import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
 import com.osuserverlist.bjar.models.database.BssMapsetEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 import com.osuserverlist.bjar.repos.BeatmapRepository;
 
@@ -23,6 +23,7 @@ import io.ebean.ExpressionList;
 import io.ebean.PagedList;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -39,28 +40,47 @@ import io.javalin.openapi.OpenApiResponse;
  */
 @Host("api.")
 @Path("/api/v1/get_player_beatmapsets")
-@HttpMethod("GET")
+@WebEngine.HttpMethod("GET")
 public class PlayerBeatmapsetsAPIHandler implements Handler {
 
     @Override
     @OpenApi(
         summary = "Player beatmap sets",
-        description = "The beatmap sets a player uploaded through the in-game submission system, "
-                + "newest update first. Each set includes its difficulties.",
+        description = "The beatmap sets a player uploaded through the in-game submission system, " + "newest update first. Each set includes its difficulties.",
         tags = { "Users", "Beatmaps" },
         queryParams = {
             @OpenApiParam(name = "id", type = Integer.class, description = "Player id (id or name required)."),
             @OpenApiParam(name = "name", type = String.class, description = "Player name (id or name required)."),
-            @OpenApiParam(name = "status", type = Integer.class, description = "Optional ranked status filter (-2 graveyard, -1 WIP, 0 pending, 1 ranked, 2 approved, 3 qualified, 4 loved)."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "status",
+                type = Integer.class,
+                description = "Optional ranked status filter (-2 graveyard, -1 WIP, 0 pending, 1 ranked, 2 approved, 3 qualified, 4 loved)."
+            ),
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedBeatmapsets.class) }, description = "Paginated list of beatmap sets"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Player not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedBeatmapsets.class) },
+                description = "Paginated list of beatmap sets"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Player not found"
+            )
         },
         path = "/api/v1/get_player_beatmapsets",
-        methods = io.javalin.openapi.HttpMethod.GET
+        methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
         int offset = ApiPagination.offset(ctx);

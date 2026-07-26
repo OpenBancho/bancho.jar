@@ -112,7 +112,6 @@ public class ModerationCommands extends BanchoCommandHandler {
             return;
         }
 
-        
         applyRestriction(session, sender, username, reason, restrict);
     }
 
@@ -196,7 +195,7 @@ public class ModerationCommands extends BanchoCommandHandler {
         int silenceEnd = silence ? (int) ((System.currentTimeMillis() / 1000L) + durationSeconds) : 0;
 
         applySilence(session, sender, username, reason, silence, durationSeconds, silenceEnd);
-        
+
     }
 
     private void applySilence(Session session, Player sender, String username, String reason, boolean silence, int durationSeconds, int silenceEnd) {

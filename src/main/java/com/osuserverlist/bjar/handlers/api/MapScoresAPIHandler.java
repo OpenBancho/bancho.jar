@@ -46,12 +46,28 @@ public class MapScoresAPIHandler implements Handler {
             @OpenApiParam(name = "id", type = Integer.class, description = "Beatmap id (md5 or id required)."),
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0)."),
             @OpenApiParam(name = "mods", type = Integer.class, description = "Mods bitmask filter."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedMapScores.class) }, description = "Paginated list of scores"),
-            @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing md5/id")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedMapScores.class) },
+                description = "Paginated list of scores"
+            ),
+            @OpenApiResponse(
+                status = "400",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Missing md5/id"
+            )
         },
         path = "/api/v1/get_map_scores"
     )

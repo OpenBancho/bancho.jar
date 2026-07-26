@@ -131,7 +131,7 @@ public class BanchoPacketWriter {
 
     /**
      * Writes a boolean value to the output stream. The boolean is represented as a single byte: 1 for true and 0 for false.
-     * 
+     *
      * @param value The boolean to write.
      */
     public void writeBoolean(boolean value) {
@@ -140,7 +140,7 @@ public class BanchoPacketWriter {
 
     /**
      * Writes a double to the output stream. The double is converted to its raw long bits representation and written as 8 bytes in little-endian order.
-     * 
+     *
      * @param value The double to write.
      */
     public void writeDouble(double value) {
@@ -149,7 +149,7 @@ public class BanchoPacketWriter {
 
     /**
      * Writes a string to the output stream. The string is prefixed with its length as an unsigned LEB128 integer.
-     * 
+     *
      * @param str The string to write. If null or empty, a length of 0 is written.
      */
     public void writeString(String str) {
@@ -176,7 +176,7 @@ public class BanchoPacketWriter {
 
     /**
      * Writes a list of integers to the output stream. The list is prefixed with its length as an unsigned short (2 bytes, little-endian).
-     * 
+     *
      * @param values The list of integers to write. If null, a length of 0 is written.
      */
     public void writeIntList(List<Integer> values) {
@@ -196,7 +196,7 @@ public class BanchoPacketWriter {
 
     /**
      * Writes a osu! Match object to the output stream. Match objects represent the state of a multiplayer match, including player slots, host information, and match settings.
-     * 
+     *
      * @param match The Match object containing the match data to write.
      */
     public void writeMatch(Match match) {
@@ -247,7 +247,7 @@ public class BanchoPacketWriter {
 
     /**
      * Writes a osu! Score Frame to the output stream. ScoreFrames are used in replays and spectating to represent the state of a player's score at a specific point in time.
-     * 
+     *
      * @param scoreFrame The ScoreFrame object containing the score data to write.
      */
     public void writeScoreFrame(ScoreFrame scoreFrame) throws IOException {
@@ -279,7 +279,7 @@ public class BanchoPacketWriter {
     /**
      * Writes an unsigned LEB128 encoded integer.
      * ULEB128 is a variable-length encoding for unsigned integers.
-     * 
+     *
      * @param value The value to encode
      */
     private void writeUleb128(int value) {

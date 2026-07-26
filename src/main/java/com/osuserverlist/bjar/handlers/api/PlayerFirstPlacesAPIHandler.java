@@ -12,14 +12,15 @@ import com.osuserverlist.bjar.models.api.ApiMappers;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.ScoreEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.ebean.DB;
 import io.ebean.SqlRow;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -36,7 +37,7 @@ import io.javalin.openapi.OpenApiResponse;
  */
 @Host("api.")
 @Path("/api/v1/get_player_first_places")
-@HttpMethod("GET")
+@WebEngine.HttpMethod("GET")
 public class PlayerFirstPlacesAPIHandler implements Handler {
 
     /** Shared by the count and the page query so they can never drift apart. */
@@ -60,15 +61,31 @@ public class PlayerFirstPlacesAPIHandler implements Handler {
             @OpenApiParam(name = "id", type = Integer.class, description = "Player id (id or name required)."),
             @OpenApiParam(name = "name", type = String.class, description = "Player name (id or name required)."),
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0)."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedPlayerScores.class) }, description = "Paginated list of first places"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Player not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedPlayerScores.class) },
+                description = "Paginated list of first places"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Player not found"
+            )
         },
         path = "/api/v1/get_player_first_places",
-        methods = io.javalin.openapi.HttpMethod.GET
+        methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
         int offset = ApiPagination.offset(ctx);

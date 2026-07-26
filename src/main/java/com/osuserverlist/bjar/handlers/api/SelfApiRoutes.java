@@ -32,8 +32,8 @@ import com.osuserverlist.bjar.modules.admin.AdminActions;
 import com.osuserverlist.bjar.modules.api.OAuthToken;
 import com.osuserverlist.bjar.modules.api.TokenStore;
 import com.osuserverlist.bjar.modules.datastore.Redis;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 import com.osuserverlist.bjar.packets.server.UtilServerPackets.NotificationPacket;
 import com.osuserverlist.bjar.repos.StatsRepository;
@@ -42,6 +42,7 @@ import com.osuserverlist.bjar.repos.UserRepository;
 import io.ebean.DB;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -83,9 +84,6 @@ public final class SelfApiRoutes {
 
     private static final String LEADERBOARD_KEY = "bjar:leaderboard:";
 
-    private SelfApiRoutes() {
-    }
-
     // ------------------------------------------------------------------
     // read
     // ------------------------------------------------------------------
@@ -93,7 +91,7 @@ public final class SelfApiRoutes {
     /** GET /api/v1/me */
     @Host("api.")
     @Path("/api/v1/me")
-    @HttpMethod("GET")
+    @WebEngine.HttpMethod("GET")
     public static class MeHandler implements Handler {
 
         @Override
@@ -101,15 +99,36 @@ public final class SelfApiRoutes {
             summary = "Own profile",
             description = "The account behind the access token, including the private fields (email, silence and donor end, userpage). Requires the identify scope.",
             tags = { "Me" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SelfResponse.class) }, description = "Own profile and stats per mode"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege"),
-                @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The account no longer exists")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SelfResponse.class) },
+                    description = "Own profile and stats per mode"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                ),
+                @OpenApiResponse(
+                    status = "404",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The account no longer exists"
+                )
             },
             path = "/api/v1/me",
-            methods = io.javalin.openapi.HttpMethod.GET
+            methods = HttpMethod.GET
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken token = ApiAuth.require(ctx);
@@ -154,7 +173,7 @@ public final class SelfApiRoutes {
     /** POST /api/v1/me/update */
     @Host("api.")
     @Path("/api/v1/me/update")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class UpdateHandler implements Handler {
 
         @Override
@@ -162,16 +181,41 @@ public final class SelfApiRoutes {
             summary = "Update own profile",
             description = "Changes the profile fields of the account behind the access token. Only the supplied fields are touched. Requires the profile scope and an unrestricted account.",
             tags = { "Me" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.SelfUpdateRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.SelfUpdateRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                )
             },
             path = "/api/v1/me/update",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken token = ApiAuth.require(ctx);
@@ -303,7 +347,7 @@ public final class SelfApiRoutes {
     /** POST /api/v1/me/email */
     @Host("api.")
     @Path("/api/v1/me/email")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class EmailHandler implements Handler {
 
         @Override
@@ -311,16 +355,41 @@ public final class SelfApiRoutes {
             summary = "Change own email",
             description = "Changes the email address. The current password has to be supplied again, so a stolen access token is not enough. Requires the profile scope.",
             tags = { "Me" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.SelfEmailRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.SelfEmailRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                )
             },
             path = "/api/v1/me/email",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken token = ApiAuth.require(ctx);
@@ -370,7 +439,7 @@ public final class SelfApiRoutes {
     /** POST /api/v1/me/password */
     @Host("api.")
     @Path("/api/v1/me/password")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class PasswordHandler implements Handler {
 
         @Override
@@ -378,16 +447,41 @@ public final class SelfApiRoutes {
             summary = "Change own password",
             description = "Changes the password and revokes every other session of the account. The current password has to be supplied again. Requires the profile scope.",
             tags = { "Me" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.SelfPasswordRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.SelfPasswordRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                )
             },
             path = "/api/v1/me/password",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken token = ApiAuth.require(ctx);
@@ -452,7 +546,7 @@ public final class SelfApiRoutes {
     /** POST /api/v1/me/delete */
     @Host("api.")
     @Path("/api/v1/me/delete")
-    @HttpMethod("POST")
+    @WebEngine.HttpMethod("POST")
     public static class DeleteHandler implements Handler {
 
         @Override
@@ -460,16 +554,41 @@ public final class SelfApiRoutes {
             summary = "Delete own account",
             description = "Irreversibly deletes the account behind the access token together with its scores, stats and sessions. The current password has to be supplied again. Requires the profile scope.",
             tags = { "Me" },
-            headers = { @OpenApiParam(name = "Authorization", description = "Bearer access token. May be omitted when the bjar_access cookie is sent.") },
-            requestBody = @OpenApiRequestBody(required = true, content = { @OpenApiContent(from = ApiDto.SelfDeleteRequest.class) }),
+            headers = {
+                @OpenApiParam(
+                    name = "Authorization",
+                    description = "Bearer access token. May be omitted when the bjar_access cookie is sent."
+                )
+            },
+            requestBody =
+                @OpenApiRequestBody(
+                    required = true,
+                    content = { @OpenApiContent(from = ApiDto.SelfDeleteRequest.class) }
+                ),
             responses = {
-                @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) }, description = "Done"),
-                @OpenApiResponse(status = "400", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing or invalid field"),
-                @OpenApiResponse(status = "401", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Missing, expired or revoked access token"),
-                @OpenApiResponse(status = "403", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "The token lacks the required scope, or the account lacks the required privilege")
+                @OpenApiResponse(
+                    status = "200",
+                    content = { @OpenApiContent(from = ApiDto.SuccessResponse.class) },
+                    description = "Done"
+                ),
+                @OpenApiResponse(
+                    status = "400",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing or invalid field"
+                ),
+                @OpenApiResponse(
+                    status = "401",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "Missing, expired or revoked access token"
+                ),
+                @OpenApiResponse(
+                    status = "403",
+                    content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                    description = "The token lacks the required scope, or the account lacks the required privilege"
+                )
             },
             path = "/api/v1/me/delete",
-            methods = io.javalin.openapi.HttpMethod.POST
+            methods = HttpMethod.POST
         )
         public void handle(@NotNull Context ctx) {
             OAuthToken token = ApiAuth.require(ctx);

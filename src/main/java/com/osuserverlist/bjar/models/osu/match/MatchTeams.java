@@ -12,5 +12,5 @@ public enum MatchTeams {
         this.value = value;
         this.byteValue = (byte) value;
     }
-    
+
 }

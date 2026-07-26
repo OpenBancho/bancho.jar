@@ -47,12 +47,28 @@ public class PlayerScoresAPIHandler implements Handler {
             @OpenApiParam(name = "scope", type = String.class, description = "'recent' (default) or 'best'."),
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0)."),
             @OpenApiParam(name = "mods", type = Integer.class, description = "Mods bitmask filter."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedPlayerScores.class) }, description = "Paginated list of scores"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Player not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedPlayerScores.class) },
+                description = "Paginated list of scores"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Player not found"
+            )
         },
         path = "/api/v1/get_player_scores"
     )

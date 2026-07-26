@@ -1,5 +1,7 @@
 package com.osuserverlist.bjar.handlers.osu;
 
+import java.util.stream.Collectors;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.App;
@@ -36,7 +38,7 @@ public class OsuGetFriendsHandler implements Handler {
                 .stream()
                 .map(Integer::intValue)
                 .map(String::valueOf)
-                .collect(java.util.stream.Collectors.joining("\n"));
+                .collect(Collectors.joining("\n"));
         ctx.status(200).result(response);
 
     }

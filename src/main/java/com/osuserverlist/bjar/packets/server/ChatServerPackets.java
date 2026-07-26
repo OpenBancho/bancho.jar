@@ -18,7 +18,7 @@ public class ChatServerPackets {
 
     @Value
     public static class ChannelInfoPacket implements ServerPacket {
-        private String channelName; 
+        private String channelName;
         private String channelDescription;
         private int userCount;
     }
@@ -107,7 +107,7 @@ public class ChatServerPackets {
         @Override
         public void write(ChannelInfoEndPacket packet, BanchoPacketWriter writer, Player player) {
             writer.startPacket(ServerPackets.CHANNEL_INFO_END);
-            writer.endPacket(); 
+            writer.endPacket();
         }
     }
 

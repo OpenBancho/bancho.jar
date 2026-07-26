@@ -20,9 +20,6 @@ import io.javalin.http.Context;
  */
 public final class ApiMappers {
 
-    private ApiMappers() {
-    }
-
     /**
      * Resolve a player from the {@code id} or {@code name} query parameters.
      * Returns {@code null} when neither is supplied or no such player exists.

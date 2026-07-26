@@ -49,9 +49,6 @@ public final class BeatmapSubmissionService {
 
     private static final Object ID_LOCK = new Object();
 
-    private BeatmapSubmissionService() {
-    }
-
     /** Thrown for every expected, user facing submission failure. */
     public static class BssException extends Exception {
 

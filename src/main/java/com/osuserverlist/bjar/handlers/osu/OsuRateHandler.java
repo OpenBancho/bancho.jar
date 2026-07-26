@@ -1,13 +1,15 @@
 package com.osuserverlist.bjar.handlers.osu;
 
+import java.util.Locale;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
 import com.osuserverlist.bjar.models.essentials.Player;
+import com.osuserverlist.bjar.models.osu.RankedStatus;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
-import com.osuserverlist.bjar.models.osu.RankedStatus;
 import com.osuserverlist.bjar.repos.BeatmapRepository;
 import com.osuserverlist.bjar.repos.RatingRepository;
 
@@ -94,7 +96,7 @@ public class OsuRateHandler implements Handler {
     }
 
     private String formatAverage(String mapMd5) {
-        return String.format(java.util.Locale.ROOT, "alreadyvoted%n%.2f", RatingRepository.averageForMap(mapMd5))
+        return String.format(Locale.ROOT, "alreadyvoted%n%.2f", RatingRepository.averageForMap(mapMd5))
                 .replace(System.lineSeparator(), "\n");
     }
 }

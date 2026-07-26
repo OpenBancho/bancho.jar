@@ -22,9 +22,6 @@ import com.osuserverlist.bjar.repos.BssMapsetRepository;
  */
 public final class ApiBeatmapsets {
 
-    private ApiBeatmapsets() {
-    }
-
     /**
      * @return the set, or null when no difficulty with that set id is known.
      */

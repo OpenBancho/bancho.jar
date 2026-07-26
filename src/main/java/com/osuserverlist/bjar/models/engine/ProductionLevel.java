@@ -1,7 +1,7 @@
 package com.osuserverlist.bjar.models.engine;
 
 public enum ProductionLevel {
-    
+
     DEVELOPMENT("DEV"),
     PRODUCTION("PROD");
 

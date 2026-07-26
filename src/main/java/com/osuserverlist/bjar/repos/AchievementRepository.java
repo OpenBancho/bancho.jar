@@ -11,9 +11,6 @@ import io.ebean.DB;
 
 public final class AchievementRepository {
 
-    private AchievementRepository() {
-    }
-
     public static List<AchievementEntity> findAll() {
         return DB.find(AchievementEntity.class).findList();
     }

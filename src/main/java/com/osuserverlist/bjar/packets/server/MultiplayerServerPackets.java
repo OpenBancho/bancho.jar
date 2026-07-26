@@ -156,7 +156,7 @@ public class MultiplayerServerPackets {
         @Override
         public void write(MatchAllPlayersLoadedPacket packet, BanchoPacketWriter writer, Player player) {
             writer.startPacket(ServerPackets.MATCH_ALL_PLAYERS_LOADED);
-            writer.endPacket(); 
+            writer.endPacket();
         }
     }
 
@@ -165,7 +165,7 @@ public class MultiplayerServerPackets {
         @Override
         public void write(MatchCompletePacket packet, BanchoPacketWriter writer, Player player) {
             writer.startPacket(ServerPackets.MATCH_COMPLETE);
-            writer.endPacket(); 
+            writer.endPacket();
         }
     }
 

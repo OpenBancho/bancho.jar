@@ -27,9 +27,6 @@ public final class BssStorage {
     private static final Path OSZ_DIRECTORY = Path.of("data", "osz");
     private static final Path MAP_DIRECTORY = Path.of("data", "maps");
 
-    private BssStorage() {
-    }
-
     public static void initialize() {
         try {
             Files.createDirectories(OSZ2_DIRECTORY);

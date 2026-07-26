@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 
 public final class OsuVersionParser {
 
-    private OsuVersionParser() {}
-
     // b20250718
     // b20250718.2
     // b20250718cuttingedge

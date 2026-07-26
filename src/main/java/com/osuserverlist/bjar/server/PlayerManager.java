@@ -24,7 +24,7 @@ public class PlayerManager {
     private final Map<String, Player> onlineSessions = new ConcurrentHashMap<>();
     private final Map<String, Player> apiIdentMap = new ConcurrentHashMap<>();
     private final Set<Player> onlinePlayers = ConcurrentHashMap.newKeySet();
-    
+
     public void add(Player player) {
         onlineSessions.put(player.getOsuToken(), player);
         apiIdentMap.put(player.getApiIdent(), player);
@@ -46,7 +46,7 @@ public class PlayerManager {
     public Player getById(int id) {
         return getByFilter(p -> p.getId() == id);
     }
-    
+
     public Player getByUsername(String username) {
         return getByFilter(p -> p.getUsername().equalsIgnoreCase(username));
     }
@@ -137,7 +137,7 @@ public class PlayerManager {
 
     public Player getBotPlayer(int id) {
         UserEntity entity = UserRepository.findById(id);
-        
+
         if (entity == null) {
             return null;
         }
@@ -148,7 +148,7 @@ public class PlayerManager {
         botPlayer.setUsername(entity.getName());
         botPlayer.setCountry((short) 245); // satellite provider
         botPlayer.setEntity(entity);
- 
+
         for (int i = 0; i <= 8; i++) {
             ModeStats modeStats = new ModeStats();
             botPlayer.getModeStats()[i] = modeStats;

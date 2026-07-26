@@ -1,5 +1,7 @@
 package com.osuserverlist.bjar.models.osu;
 
+import java.util.Arrays;
+
 import lombok.AllArgsConstructor;
 
 public class OsuClientModels {
@@ -23,7 +25,7 @@ public class OsuClientModels {
         public final int id;
 
         public static ActionStatus getById(int id) {
-            return java.util.Arrays.stream(values())
+            return Arrays.stream(values())
                     .filter(s -> s.id == id)
                     .findFirst()
                     .orElse(null);

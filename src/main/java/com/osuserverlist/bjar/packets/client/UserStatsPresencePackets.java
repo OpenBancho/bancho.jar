@@ -29,7 +29,7 @@ public class UserStatsPresencePackets {
         logger.debug("Player {} requested presence info for user IDs {}", player, userIds);
 
         for (Integer userId : userIds) {
-            
+
             Player requestedPlayer = App.server.playerManager.getById(userId);
 
             if (requestedPlayer != null) {

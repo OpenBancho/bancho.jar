@@ -14,14 +14,15 @@ import com.osuserverlist.bjar.models.api.ApiMappers;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.AchievementEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
+import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
-import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.ebean.DB;
 import io.ebean.SqlRow;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
@@ -44,7 +45,7 @@ import io.javalin.openapi.OpenApiResponse;
  */
 @Host("api.")
 @Path("/api/v1/get_player_achievements")
-@HttpMethod("GET")
+@WebEngine.HttpMethod("GET")
 public class PlayerAchievementsAPIHandler implements Handler {
 
     @Override
@@ -55,14 +56,26 @@ public class PlayerAchievementsAPIHandler implements Handler {
         queryParams = {
             @OpenApiParam(name = "id", type = Integer.class, description = "Player id (id or name required)."),
             @OpenApiParam(name = "name", type = String.class, description = "Player name (id or name required)."),
-            @OpenApiParam(name = "unlocked_only", type = Boolean.class, description = "Return only the medals the player owns (default false).")
+            @OpenApiParam(
+                name = "unlocked_only",
+                type = Boolean.class,
+                description = "Return only the medals the player owns (default false)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.AchievementsResponse.class) }, description = "The medals of the player"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Player not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.AchievementsResponse.class) },
+                description = "The medals of the player"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Player not found"
+            )
         },
         path = "/api/v1/get_player_achievements",
-        methods = io.javalin.openapi.HttpMethod.GET
+        methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
         UserEntity user = ApiMappers.resolveUser(ctx);

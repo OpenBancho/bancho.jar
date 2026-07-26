@@ -32,9 +32,6 @@ public final class ApiPagination {
     /** Hard upper bound on the page size a caller may request. */
     public static final int MAX_LIMIT = 100;
 
-    private ApiPagination() {
-    }
-
     /** Parse an integer query parameter, falling back to {@code fallback}. */
     public static int intParam(Context ctx, String name, int fallback) {
         String raw = ctx.queryParam(name);

@@ -150,7 +150,6 @@ public class GeoLocation {
             logger.info("Downloading GeoLite2-City.mmdb...");
 
             File tmp = File.createTempFile("GeoLite2-City", ".part", DB_FILE.getParentFile());
-    
 
             try (Response response = HTTP.newCall(new Request.Builder().url(DB_URL).build()).execute()) {
                 if (!response.isSuccessful() || response.body() == null) {
@@ -180,7 +179,7 @@ public class GeoLocation {
                 if (isoCode == null) {
                     return null;
                 }
-                
+
                 Location location = response.location();
                 float lat = location.latitude() != null
                         ? location.latitude().floatValue() : 0f;

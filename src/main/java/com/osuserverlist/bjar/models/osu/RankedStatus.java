@@ -1,5 +1,7 @@
 package com.osuserverlist.bjar.models.osu;
 
+import java.util.Arrays;
+
 public enum RankedStatus {
    UNSPECIFIED(-3),
    Graveyard(-2),
@@ -21,7 +23,7 @@ public enum RankedStatus {
    }
 
    public static RankedStatus getById(int id) {
-      return (RankedStatus) java.util.Arrays.stream(values())
+      return (RankedStatus) Arrays.stream(values())
             .filter(s -> s.id == id)
             .findFirst()
             .orElse(UNSPECIFIED);

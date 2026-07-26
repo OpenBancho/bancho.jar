@@ -37,13 +37,33 @@ public class LeaderboardAPIHandler implements Handler {
         tags = { "Server" },
         queryParams = {
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0)."),
-            @OpenApiParam(name = "sort", type = String.class, description = "'pp' (default), 'score', 'acc' or 'plays'."),
-            @OpenApiParam(name = "country", type = String.class, description = "Two letter country code. Omitted or 'all' for the global ranking."),
-            @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
-            @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
+            @OpenApiParam(
+                name = "sort",
+                type = String.class,
+                description = "'pp' (default), 'score', 'acc' or 'plays'."
+            ),
+            @OpenApiParam(
+                name = "country",
+                type = String.class,
+                description = "Two letter country code. Omitted or 'all' for the global ranking."
+            ),
+            @OpenApiParam(
+                name = "offset",
+                type = Integer.class,
+                description = "Zero-based offset into the result set (default 0)."
+            ),
+            @OpenApiParam(
+                name = "limit",
+                type = Integer.class,
+                description = "Maximum results to return, 1-100 (default 50)."
+            )
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.PaginatedLeaderboard.class) }, description = "Paginated leaderboard")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.PaginatedLeaderboard.class) },
+                description = "Paginated leaderboard"
+            )
         },
         path = "/api/v1/get_leaderboard"
     )

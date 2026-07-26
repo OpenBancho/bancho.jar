@@ -14,6 +14,7 @@ import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 import com.osuserverlist.bjar.repos.CommentRepository;
+import com.osuserverlist.bjar.repos.UserRepository;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
@@ -166,7 +167,7 @@ public class OsuCommentHandler implements Handler {
             return 0;
         }
 
-        var author = com.osuserverlist.bjar.repos.UserRepository.findById(userId);
+        var author = UserRepository.findById(userId);
 
         if (author == null || author.getPrivileges() == null) {
             return 0;

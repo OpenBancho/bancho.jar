@@ -39,8 +39,16 @@ public class MapInfoAPIHandler implements Handler {
             @OpenApiParam(name = "id", type = Integer.class, description = "Beatmap id (md5 or id required).")
         },
         responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = ApiDto.MapInfoResponse.class) }, description = "Beatmap metadata"),
-            @OpenApiResponse(status = "404", content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) }, description = "Beatmap not found")
+            @OpenApiResponse(
+                status = "200",
+                content = { @OpenApiContent(from = ApiDto.MapInfoResponse.class) },
+                description = "Beatmap metadata"
+            ),
+            @OpenApiResponse(
+                status = "404",
+                content = { @OpenApiContent(from = ApiDto.ErrorResponse.class) },
+                description = "Beatmap not found"
+            )
         },
         path = "/api/v1/get_map_info"
     )
