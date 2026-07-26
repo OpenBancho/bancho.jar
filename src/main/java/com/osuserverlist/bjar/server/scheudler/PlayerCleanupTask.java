@@ -14,7 +14,13 @@ public class PlayerCleanupTask implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayerCleanupTask.class);
 
-    private static final long OSU_CLIENT_MIN_PING_INTERVAL = 300_000L * 5;
+    /**
+     * How long a session may stay silent before it is considered dead. The
+     * client talks to the server every few seconds, so anything past a few
+     * minutes means the connection is gone; the generous window is there
+     * for players on bad connections.
+     */
+    private static final long SESSION_SILENCE_LIMIT = 300_000L * 5;
 
     @Override
     public void run() {
@@ -32,14 +38,17 @@ public class PlayerCleanupTask implements Runnable {
     }
 
     private void disconnectInactivePlayer(Server server, Player player) {
-        long lastPing = player.getLastPing();
+        long lastSeen = player.getLastPing();
 
-        if (lastPing == 0) {
+        if (lastSeen == 0) {
             return;
         }
 
-        if (System.currentTimeMillis() - lastPing > OSU_CLIENT_MIN_PING_INTERVAL) {
-            logger.info("Auto disconnected {} because of inactivity", player);
+        long silent = System.currentTimeMillis() - lastSeen;
+
+        if (silent > SESSION_SILENCE_LIMIT) {
+            logger.info("Auto disconnected {} after {} seconds without a request",
+                    player, silent / 1000L);
             server.playerManager.disconnect(player);
         }
     }
@@ -63,9 +72,14 @@ public class PlayerCleanupTask implements Runnable {
             return;
         }
 
-        server.playerManager.removePriv(player, Privileges.SUPPORTER);
+        // Drop the privilege in place. Going through removePriv would kick
+        // the player off the server, which is not what an expiring tag
+        // should do; the client picks the change up on its next login.
+        player.setServerPrivileges(
+                player.getServerPrivileges() & ~Privileges.SUPPORTER.getValue());
 
         UserEntity entity = player.getEntity();
+        entity.setPrivileges(player.getServerPrivileges());
         entity.setDonorEnd(0);
         UserRepository.save(entity);
 

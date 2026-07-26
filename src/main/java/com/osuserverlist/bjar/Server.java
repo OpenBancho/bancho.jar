@@ -173,5 +173,11 @@ public class Server {
         private int ircPort;
 
         private boolean onlySendHelpDm;
+
+        /** Beatmap Submission System. */
+        private boolean bssEnabled;
+        private int bssIdOffset;
+        private int bssMaxPendingSets;
+        private int bssMaxUploadSizeMb;
     }
 }

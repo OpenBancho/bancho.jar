@@ -64,6 +64,12 @@ public class ChoHandler implements Handler {
             return;
         }
 
+        // The client polls this endpoint continuously while it is online,
+        // whether or not it has a PING packet to send, so the request
+        // itself is the proof that the session is alive. Counting only
+        // PING packets made the cleanup task drop players mid-session.
+        player.setLastPing(System.currentTimeMillis());
+
         byte[] requestBody = ctx.bodyAsBytes();
         if (requestBody.length > 0) {
             try {

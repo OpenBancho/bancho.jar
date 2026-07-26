@@ -17,9 +17,9 @@ import com.osuserverlist.bjar.modules.main.Commands.BanchoCommandHandler;
 import com.osuserverlist.bjar.modules.main.Commands.CommandCategory;
 import com.osuserverlist.bjar.modules.main.Commands.CommandInfo;
 import com.osuserverlist.bjar.modules.main.Commands.Session;
+import com.osuserverlist.bjar.modules.osu.OsuFileParser;
 import com.osuserverlist.bjar.modules.osu.OsuMapDownloader;
-
-import me.skiincraft.api.ousu.entity.beatmap.Beatmap;
+import com.osuserverlist.bjar.repos.BeatmapRepository;
 
 public class GeneralCommands extends BanchoCommandHandler {
 
@@ -40,16 +40,42 @@ public class GeneralCommands extends BanchoCommandHandler {
             }
         }
 
-        Beatmap beatmap = session.server.osuAPIHandler.getRawBeatmapById(sender.getLastNpBeatmapId());
-        if (beatmap == null) {
-            session.sendAnswer("Beatmap not found.");
+        long beatmapId = sender.getLastNpBeatmapId();
+
+        // The .osu file is the only metadata source that works for every map.
+        // Locally submitted (BSS) maps do not exist on osu.ppy.sh, so asking the
+        // osu! API about them always ended in "Beatmap not found."; the file has
+        // to be read for the pp calculation anyway.
+        byte[] mapData = OsuMapDownloader.downloadMap(beatmapId);
+
+        if (mapData == null || mapData.length == 0) {
+            session.sendAnswer("The beatmap file is not available on this server.");
             return;
         }
 
-        session.sendAnswer(String.format("Selected beatmap: %s",
-                BeatmapEntity.toEmbed(beatmap.getBeatmapId(), beatmap.getBeatmapSetId(), beatmap.getArtist(), beatmap.getTitle(), beatmap.getVersion())));
+        OsuFileParser.ParsedBeatmap beatmap;
 
-        session.sendAnswer(calculatePpBreakdown(sender, beatmap, mods, session));
+        try {
+            beatmap = OsuFileParser.parse(mapData);
+        } catch (RuntimeException e) {
+            session.sendAnswer("The beatmap file could not be read.");
+            return;
+        }
+
+        // The database row wins for display metadata, because a nominator may
+        // have edited it; the parsed file is the fallback for maps we never
+        // cached.
+        BeatmapEntity known = BeatmapRepository.findById(beatmapId);
+
+        long setId = known != null ? known.getSetId() : beatmap.getBeatmapSetId();
+        String artist = known != null ? known.getArtist() : beatmap.getArtist();
+        String title = known != null ? known.getTitle() : beatmap.getTitle();
+        String version = known != null ? known.getVersion() : beatmap.getVersion();
+
+        session.sendAnswer(String.format("Selected beatmap: %s",
+                BeatmapEntity.toEmbed(beatmapId, setId, artist, title, version)));
+
+        session.sendAnswer(calculatePpBreakdown(sender, beatmap, mapData, mods, session));
 
     }
 
@@ -57,9 +83,8 @@ public class GeneralCommands extends BanchoCommandHandler {
      * Builds a "PP | 100% - x.xx | 95% - x.xx | ..." breakdown from 100% down to
      * 80% accuracy.
      */
-    private String calculatePpBreakdown(Player sender, Beatmap beatmap, int mods, Session session) {
-        
-        byte[] mapData = OsuMapDownloader.downloadMap(beatmap.getBeatmapId());
+    private String calculatePpBreakdown(Player sender, OsuFileParser.ParsedBeatmap beatmap, byte[] mapData,
+            int mods, Session session) {
 
         StringBuilder breakdown = new StringBuilder("PP | ");
         for (int acc = 100; acc >= 80; acc -= 5) {
@@ -67,8 +92,7 @@ public class GeneralCommands extends BanchoCommandHandler {
             score.setMode(sender.getGameMode());
             score.setAccuracy(acc / 100.0);
             score.setMax_combo(beatmap.getMaxCombo());
-            int hitObjectCount = beatmap.getCircles() + beatmap.getSliders() + beatmap.getSpinners();
-            score.setN300(hitObjectCount);
+            score.setN300(beatmap.getObjectCount());
             score.setMods(mods);
 
             double pp = session.server.performance.calculate(score, mapData);

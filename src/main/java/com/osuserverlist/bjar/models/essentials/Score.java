@@ -4,6 +4,7 @@ import java.time.ZoneOffset;
 
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
 import com.osuserverlist.bjar.models.database.ScoreEntity;
+import com.osuserverlist.bjar.models.osu.AntiCheatFlags;
 import com.osuserverlist.bjar.modules.calculations.AccuracyCalculator;
 
 import lombok.Data;
@@ -26,7 +27,14 @@ public class Score {
     private boolean passed = false;
     private String grade = "A";
     private int mode = 0;
+    /**
+     * When the play happened, in epoch milliseconds. The client expects a
+     * timestamp in this position of the leaderboard string, so this is not
+     * a duration despite the name.
+     */
     private long playtime = 60000;
+    /** How long the play itself lasted, in milliseconds. */
+    private int timeElapsed = 0;
     private int flags = 0;
     private int mods = 0;
     private String username = "unknown";
@@ -69,7 +77,7 @@ public class Score {
         s.setNgeki(Integer.parseInt(data[6]));
         s.setNkatu(Integer.parseInt(data[7]));
         s.setNmiss(Integer.parseInt(data[8]));
-        s.setScore(Integer.parseInt(data[9]));
+        s.setScore(Long.parseLong(data[9]));
         s.setMax_combo(Integer.parseInt(data[10]));
         s.setPerfect(Boolean.parseBoolean(data[11]));
         s.setGrade(data[12]);
@@ -77,9 +85,27 @@ public class Score {
         s.setPassed(Boolean.parseBoolean(data[14]));
         s.setMode(Integer.parseInt(data[15]));
         s.setPlaytime((System.currentTimeMillis()));
-        s.setFlags((int) data[15].chars().filter(c -> c == ' ').count() & ~4);
+        s.setFlags(parseClientFlags(data));
         s.setAccuracy(AccuracyCalculator.calculateAccuracy(s));
         return s;
+    }
+
+    /**
+     * Reads the anti-cheat flags the client attaches to a submission.
+     *
+     * <p>They are encoded as trailing spaces on the <b>client version</b>
+     * field (index 17), not on the play mode: index 15 holds the mode and is
+     * a plain number, so counting spaces there always yielded zero.</p>
+     *
+     * <p>Bit 2 ({@code INCORRECT_MOD_VALUE}) is masked out because the
+     * official client raises it on its own without any tampering.</p>
+     */
+    private static int parseClientFlags(String[] data) {
+        if (data.length <= 17 || data[17] == null) {
+            return AntiCheatFlags.ClientFlags.CLEAN;
+        }
+
+        return (int) data[17].chars().filter(c -> c == ' ').count() & ~4;
     }
 
 

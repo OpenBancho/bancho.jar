@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
+import com.osuserverlist.bjar.models.api.ApiProfile;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.StatsEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
@@ -62,13 +63,32 @@ public class PlayerDetailsAPIHandler implements Handler {
         Map<String, Object> player = new LinkedHashMap<>();
 
         if ("info".equalsIgnoreCase(scope) || "all".equalsIgnoreCase(scope)) {
-            player.put("info", ApiMappers.userInfo(user));
+            Map<String, Object> info = ApiMappers.userInfo(user);
+
+            // Not a stored column: counted from the friend relationships
+            // pointing at this account.
+            info.put("followers", ApiProfile.followers(user.getId()));
+
+            player.put("info", info);
         }
 
         if ("stats".equalsIgnoreCase(scope) || "all".equalsIgnoreCase(scope)) {
             Map<String, Object> statsByMode = new LinkedHashMap<>();
             for (StatsEntity stats : StatsRepository.findAllByUser(user.getId())) {
-                statsByMode.put(String.valueOf(stats.getId().getMode()), ApiMappers.stats(stats));
+                Map<String, Object> mapped = ApiMappers.stats(stats);
+
+                int statsMode = stats.getId().getMode();
+                long pp = stats.getPp() == null ? 0L : stats.getPp();
+                long totalScore = stats.getTotalScore() == null ? 0L : stats.getTotalScore();
+
+                // Ranks and level are derived on request; see ApiProfile.
+                mapped.put("rank", ApiProfile.globalRank(statsMode, pp));
+                mapped.put("country_rank",
+                        ApiProfile.countryRank(statsMode, pp, user.getCountry()));
+                mapped.put("level", ApiProfile.level(totalScore));
+                mapped.put("level_progress", ApiProfile.levelProgress(totalScore));
+
+                statsByMode.put(String.valueOf(statsMode), mapped);
             }
             player.put("stats", statsByMode);
         }

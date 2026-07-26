@@ -28,9 +28,9 @@
 - [x] Achievements
 - [ ] Web Redirects
 - [x] osu!Direct
-- [ ] BSS
+- [x] BSS
 - [x] IRC
-- [ ] Tourney Client
+- [x] Tourney Client
 
 ### Backend
 

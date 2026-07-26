@@ -1,5 +1,6 @@
 package com.osuserverlist.bjar.repos;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
@@ -254,6 +255,28 @@ public final class ScoreRepository {
                 .asUpdate()
                 .set("pp", (float) pp)
                 .update();
+    }
+
+    /**
+     * Tells whether the given player already submitted a score carrying this
+     * checksum since the given moment.
+     *
+     * <p>The checksum is produced by the client and covers the play itself,
+     * so an identical value arriving twice within a few seconds means the
+     * very same submission was replayed, not a second play.</p>
+     */
+    public static boolean existsRecentByChecksum(int userId, String onlineChecksum, LocalDateTime since) {
+        if (onlineChecksum == null || onlineChecksum.isBlank()) {
+            return false;
+        }
+
+        return DB.find(ScoreEntity.class)
+                .select("id")
+                .where()
+                .eq("user.id", userId)
+                .eq("onlineChecksum", onlineChecksum)
+                .gt("playTime", since)
+                .exists();
     }
 
     public static long count() {

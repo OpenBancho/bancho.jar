@@ -16,6 +16,8 @@ import com.osuserverlist.bjar.modules.datastore.Redis;
 import com.osuserverlist.bjar.modules.main.Application;
 import com.osuserverlist.bjar.modules.main.Application.BuildInfo;
 import com.osuserverlist.bjar.modules.main.Logging.LoggerConfiguration;
+import com.osuserverlist.bjar.modules.osu.BeatmapSubmissionService;
+import com.osuserverlist.bjar.modules.osu.BssStorage;
 import com.osuserverlist.bjar.modules.recalc.RecalcRunnable;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -84,6 +86,9 @@ public class App {
             Files.createDirectories(Path.of("data/assets/avatars"));
             Files.createDirectories(Path.of("data/assets/medals/client"));
 
+            // Beatmap Submission System storage
+            BssStorage.initialize();
+
             AchievementDownloader downloader = new AchievementDownloader();
             DefaultAssetsDownloader defaultAssetsDownloader = new DefaultAssetsDownloader();
             defaultAssetsDownloader.run();
@@ -111,6 +116,12 @@ public class App {
             config.setIrcPort(Integer.parseInt(dotenv.get("IRC_PORT", "6667")));
 
             config.setOnlySendHelpDm(Boolean.parseBoolean(dotenv.get("ONLY_SEND_HELP_DM", "false")));
+
+            config.setBssEnabled(Boolean.parseBoolean(dotenv.get("BSS_ENABLED", "true")));
+            config.setBssIdOffset(Integer.parseInt(
+                    dotenv.get("BSS_ID_OFFSET", String.valueOf(BeatmapSubmissionService.DEFAULT_ID_OFFSET))));
+            config.setBssMaxPendingSets(Integer.parseInt(dotenv.get("BSS_MAX_PENDING_SETS", "10")));
+            config.setBssMaxUploadSizeMb(Integer.parseInt(dotenv.get("BSS_MAX_UPLOAD_SIZE_MB", "100")));
         });
 
         Runnable shutdownHook = () -> {

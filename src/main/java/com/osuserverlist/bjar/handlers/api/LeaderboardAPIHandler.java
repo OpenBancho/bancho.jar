@@ -16,6 +16,7 @@ import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
 
 import io.ebean.DB;
+import io.ebean.ExpressionList;
 import io.ebean.PagedList;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
@@ -36,7 +37,8 @@ public class LeaderboardAPIHandler implements Handler {
         tags = { "Server" },
         queryParams = {
             @OpenApiParam(name = "mode", type = Integer.class, description = "Game mode (default 0)."),
-            @OpenApiParam(name = "sort", type = String.class, description = "'pp' (default) or 'score'."),
+            @OpenApiParam(name = "sort", type = String.class, description = "'pp' (default), 'score', 'acc' or 'plays'."),
+            @OpenApiParam(name = "country", type = String.class, description = "Two letter country code. Omitted or 'all' for the global ranking."),
             @OpenApiParam(name = "offset", type = Integer.class, description = "Zero-based offset into the result set (default 0)."),
             @OpenApiParam(name = "limit", type = Integer.class, description = "Maximum results to return, 1-100 (default 50).")
         },
@@ -50,13 +52,29 @@ public class LeaderboardAPIHandler implements Handler {
         int limit = ApiPagination.limit(ctx);
         int mode = ApiPagination.intParam(ctx, "mode", 0);
         String sort = ctx.queryParam("sort");
-        String orderBy = "score".equalsIgnoreCase(sort) ? "rankedScore desc" : "pp desc";
+        String country = ctx.queryParam("country");
 
-        PagedList<StatsEntity> paged = DB.find(StatsEntity.class)
+        String orderBy = switch (sort == null ? "" : sort.toLowerCase()) {
+            case "score" -> "rankedScore desc";
+            case "acc" -> "accuracy desc";
+            case "plays" -> "plays desc";
+            default -> "pp desc";
+        };
+
+        ExpressionList<StatsEntity> query = DB.find(StatsEntity.class)
                 .fetch("user", "name, country")
                 .where()
                 .eq("id.mode", mode)
-                .gt("plays", 0)
+                .gt("plays", 0);
+
+        // Country codes are stored lower case. An empty value and "all"
+        // both mean the global ranking, so a filter can be cleared
+        // without dropping the parameter.
+        if (country != null && !country.isBlank() && !"all".equalsIgnoreCase(country.trim())) {
+            query.eq("user.country", country.trim().toLowerCase());
+        }
+
+        PagedList<StatsEntity> paged = query
                 .orderBy(orderBy)
                 .setFirstRow(offset)
                 .setMaxRows(limit)

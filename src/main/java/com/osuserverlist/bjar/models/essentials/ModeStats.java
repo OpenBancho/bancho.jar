@@ -65,10 +65,17 @@ public class ModeStats {
         return stats;
     }
 
+    /** Upper bound for a single play, used to drop nonsense durations. */
+    private static final int MAX_PLAY_SECONDS = 6 * 60 * 60;
+
     public void addScore(Score s) {
         totalScore += s.getScore();
         playCount++;
-        playtime += s.getPlaytime() / 100000;
+        // Playtime is the length of the play, not the moment it happened:
+        // getPlaytime() is a timestamp, so dividing it used to add roughly
+        // two hundred days of playtime per submitted score. A single play
+        // never runs for hours, so anything above that is ignored.
+        playtime += Math.max(0, Math.min(MAX_PLAY_SECONDS, s.getTimeElapsed() / 1000));
         totalHits += s.getN300()
                 + s.getN100()
                 + s.getN50()
@@ -106,8 +113,13 @@ public class ModeStats {
         }
     }
 
+    /**
+     * Adds the ranked part of a score. The score itself is already counted
+     * by {@link #addScore(Score)}, which every submission goes through, so
+     * calling it again here counted plays, playtime, total score, hits and
+     * grades twice for every personal best on a ranked map.
+     */
     public void addRankedScore(Score s, double pp) {
-        addScore(s);
         rankedScore += s.getScore();
 
         this.pp = (int) pp;

@@ -61,10 +61,22 @@ public class Performance {
         }
     }
 
+    /**
+     * Performance points for a play.
+     *
+     * <p>Returns zero when the .osu file could not be obtained. Every calculator
+     * behind this method parses the file first and would fail on empty input, so
+     * the check belongs here rather than in each caller.</p>
+     */
     public double calculate(Score score, byte[] mapData) {
         if (calculator == null) {
             throw new IllegalStateException("Performance calculator has not been loaded");
         }
+
+        if (mapData == null || mapData.length == 0) {
+            return 0.0;
+        }
+
         return calculator.calculate(score, mapData);
     }
 

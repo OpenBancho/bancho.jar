@@ -1,6 +1,9 @@
 package com.osuserverlist.bjar.repos;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
 
@@ -18,11 +21,70 @@ public class BeatmapRepository {
                 .findOne();
     }
 
+    /**
+     * Looks a map up by the name of its .osu file.
+     *
+     * <p>Filenames are not unique. The same difficulty can exist under an official
+     * id and again under a locally submitted one, and two unrelated sets can carry
+     * identically named difficulties. The row with the highest ranked status wins,
+     * then the most recently updated one, so the answer is both deterministic and
+     * the most useful of the candidates.</p>
+     */
     public static BeatmapEntity findByFilename(String filename) {
+        if (filename == null || filename.isBlank()) {
+            return null;
+        }
+
         return DB.find(BeatmapEntity.class)
                 .where()
                 .eq("filename", filename)
+                .orderBy("status desc, lastUpdate desc, id desc")
+                .setMaxRows(1)
                 .findOne();
+    }
+
+    /** Every row sharing one filename, best candidate first. */
+    public static List<BeatmapEntity> findAllByFilename(String filename) {
+        if (filename == null || filename.isBlank()) {
+            return List.of();
+        }
+
+        return DB.find(BeatmapEntity.class)
+                .where()
+                .eq("filename", filename)
+                .orderBy("status desc, lastUpdate desc, id desc")
+                .findList();
+    }
+
+    /**
+     * Resolves many filenames at once.
+     *
+     * <p>The client asks about its whole Songs folder in one request, so doing this
+     * as a single query instead of one per name is the difference between a handful
+     * of milliseconds and thousands of round trips.</p>
+     *
+     * @return one entry per filename that matched, keyed by the filename.
+     */
+    public static Map<String, BeatmapEntity> findByFilenames(Collection<String> filenames) {
+        if (filenames == null || filenames.isEmpty()) {
+            return Map.of();
+        }
+
+        List<BeatmapEntity> rows = DB.find(BeatmapEntity.class)
+                .where()
+                .in("filename", filenames)
+                .orderBy("status asc, lastUpdate asc, id asc")
+                .findList();
+
+        Map<String, BeatmapEntity> byFilename = new HashMap<>();
+
+        // Ascending order means the best candidate overwrites the weaker ones,
+        // leaving the same winner findByFilename would have picked.
+        for (BeatmapEntity row : rows) {
+            byFilename.put(row.getFilename(), row);
+        }
+
+        return byFilename;
     }
 
     public static List<BeatmapEntity> findBySetId(long setId) {

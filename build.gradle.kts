@@ -40,6 +40,7 @@ val ebeanVersion = "19.2.0"
 val jedisVersion = "7.5.3"
 val ousuApiVersion = "2.1"
 val osuNativeJarVersion = "0.0.9"
+val osz2Version = "0.0.3"
 val bcprovVersion = "1.84"
 val kotlinVersion = "2.3.21"
 val classgraphVersion = "4.8.184"
@@ -84,6 +85,9 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:$bcprovVersion")
 
     implementation("io.github.7mochi:osu-native-jar:$osuNativeJarVersion")
+
+    // OSZ2 reader/writer, used by the Beatmap Submission System
+    implementation("io.github.7mochi:osz2:$osz2Version")
 
     implementation("redis.clients:jedis:$jedisVersion")
 
