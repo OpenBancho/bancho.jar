@@ -16,6 +16,7 @@ import com.osuserverlist.bjar.modules.datastore.Redis;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import lombok.Data;
+import redis.clients.jedis.params.SetParams;
 
 /**
  * Redis backed store for OAuth2 access and refresh tokens.
@@ -156,14 +157,24 @@ public final class TokenStore {
                 clientId, ip, now, now + config.getRefreshTtlSeconds());
 
         try {
-            Redis.getClient().setex(ACCESS_PREFIX + accessToken, config.getAccessTtlSeconds(),
-                    MAPPER.writeValueAsString(access));
+            Redis.getClient().set(
+                ACCESS_PREFIX + accessToken,
+                MAPPER.writeValueAsString(access),
+                SetParams.setParams().ex(config.getAccessTtlSeconds())
+            );
 
-            Redis.getClient().setex(REFRESH_PREFIX + refreshToken, config.getRefreshTtlSeconds(),
-                    MAPPER.writeValueAsString(refresh));
+            Redis.getClient().set(
+                REFRESH_PREFIX + refreshToken,
+                MAPPER.writeValueAsString(refresh),
+                SetParams.setParams().ex(config.getRefreshTtlSeconds())
+            );
 
             // The family remembers which refresh token is the live one.
-            Redis.getClient().setex(FAMILY_PREFIX + familyId, config.getRefreshTtlSeconds(), refreshToken);
+            Redis.getClient().set(
+                FAMILY_PREFIX + familyId,
+                refreshToken,
+                SetParams.setParams().ex(config.getRefreshTtlSeconds())
+            );
         } catch (Exception e) {
             logger.error("Failed to issue tokens for user <{}>", userId, e);
             return null;

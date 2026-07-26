@@ -1,4 +1,4 @@
-package com.osuserverlist.bjar.handlers.api;
+package com.osuserverlist.bjar.handlers.api.oauth;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -25,7 +25,6 @@ import io.javalin.http.Context;
  * rights takes effect immediately instead of when their token happens to expire.</p>
  */
 public final class ApiAuth {
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /** Read the caller's own identity. Granted to every token by default. */

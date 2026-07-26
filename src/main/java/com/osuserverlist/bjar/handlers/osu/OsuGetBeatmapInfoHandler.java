@@ -2,7 +2,6 @@ package com.osuserverlist.bjar.handlers.osu;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
