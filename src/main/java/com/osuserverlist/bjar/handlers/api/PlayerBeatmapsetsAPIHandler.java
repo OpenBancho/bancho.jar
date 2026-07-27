@@ -38,7 +38,7 @@ import io.javalin.openapi.OpenApiResponse;
  * {@code maps} table, which is what a profile page needs in one request.
  * Inactive (deleted) sets are never listed.
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/get_player_beatmapsets")
 @WebEngine.HttpMethod("GET")
 public class PlayerBeatmapsetsAPIHandler implements Handler {

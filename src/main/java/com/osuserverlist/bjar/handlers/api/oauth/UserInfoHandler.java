@@ -19,7 +19,7 @@ import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiResponse;
 
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/oauth/userinfo")
 @WebEngine.HttpMethod("GET")
 public final class UserInfoHandler implements Handler {

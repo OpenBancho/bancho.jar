@@ -43,7 +43,7 @@ import io.javalin.openapi.OpenApiResponse;
  * <p>The icon of a medal is {@code file} plus an extension, served from the
  * assets host: {@code https://assets.<domain>/medals/client/<file>@2x.png}.
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/get_player_achievements")
 @WebEngine.HttpMethod("GET")
 public class PlayerAchievementsAPIHandler implements Handler {

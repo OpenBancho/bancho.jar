@@ -31,7 +31,7 @@ import io.javalin.openapi.OpenApiResponse;
  * <p>{@code best} returns only submitted personal-best scores ordered by pp;
  * {@code recent} returns all scores ordered by play time.
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/get_player_scores")
 @HttpMethod("GET")
 public class PlayerScoresAPIHandler implements Handler {

@@ -28,7 +28,7 @@ import io.javalin.openapi.OpenApiResponse;
 
 public final class PrivilegesHandler {
 
-    @Host("api.")
+    @Host({"api.", "server"})
     @Path("/api/v1/admin/privileges/add")
     @WebEngine.HttpMethod("POST")
     public static class AddPrivilegesHandler implements Handler {
@@ -85,7 +85,7 @@ public final class PrivilegesHandler {
 
     }
 
-    @Host("api.")
+    @Host({"api.", "server"})
     @Path("/api/v1/admin/privileges/remove")
     @WebEngine.HttpMethod("POST")
     public static class RemovePrivilegesHandler implements Handler {

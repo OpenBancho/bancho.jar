@@ -35,7 +35,7 @@ import io.javalin.openapi.OpenApiResponse;
  * better personal best on the same map. Ties go to the older score, the same
  * way the in-game leaderboard resolves them.
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/get_player_first_places")
 @WebEngine.HttpMethod("GET")
 public class PlayerFirstPlacesAPIHandler implements Handler {

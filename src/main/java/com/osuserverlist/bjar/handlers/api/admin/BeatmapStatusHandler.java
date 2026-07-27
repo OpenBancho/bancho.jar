@@ -20,7 +20,7 @@ import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiResponse;
 
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/admin/beatmap/status")
 @WebEngine.HttpMethod("POST")
 public final class BeatmapStatusHandler implements Handler {
@@ -29,7 +29,7 @@ public final class BeatmapStatusHandler implements Handler {
     @OpenApi(
         summary = "Set a beatmap status",
         description = "Ranks, unranks or loves a beatmap. Requires the beatmaps scope and the NOMINATOR privilege; moderators do not get this by default.",
-        tags = { "Beatmaps" },
+        tags = { "Administration" },
         headers = {
             @OpenApiParam(
                 name = "Authorization",

@@ -17,7 +17,7 @@ import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
 import io.javalin.openapi.OpenApiResponse;
 
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/get_server_stats")
 @HttpMethod("GET")
 public class StatsAPIHandler implements Handler {

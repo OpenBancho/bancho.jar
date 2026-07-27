@@ -36,7 +36,7 @@ import io.javalin.openapi.OpenApiResponse;
  * without a single play are returned as zero, which keeps the graph evenly
  * spaced on the client.
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/get_player_playcounts")
 @WebEngine.HttpMethod("GET")
 public class PlayerPlaycountsAPIHandler implements Handler {

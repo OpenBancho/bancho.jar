@@ -36,7 +36,7 @@ import io.javalin.openapi.OpenApiResponse;
  * <p>Everything a caller may influence is either a bound parameter or picked
  * from a fixed list, so no query text ever reaches the statement itself.
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/search_beatmapsets")
 @WebEngine.HttpMethod("GET")
 public class SearchBeatmapsetsAPIHandler implements Handler {

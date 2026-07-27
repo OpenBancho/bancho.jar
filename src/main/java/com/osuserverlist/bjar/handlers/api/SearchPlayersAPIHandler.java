@@ -29,7 +29,7 @@ import io.javalin.openapi.OpenApiResponse;
  *
  * <p>Only public accounts are returned ({@code priv & 3 = 3}).
  */
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/search_players")
 @HttpMethod("GET")
 public class SearchPlayersAPIHandler implements Handler {

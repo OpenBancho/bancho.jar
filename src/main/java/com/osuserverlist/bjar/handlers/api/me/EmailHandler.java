@@ -28,7 +28,7 @@ import static com.osuserverlist.bjar.handlers.api.me.MeSupport.MAX_EMAIL_LENGTH;
 import static com.osuserverlist.bjar.handlers.api.me.MeSupport.confirmPassword;
 import static com.osuserverlist.bjar.handlers.api.me.MeSupport.logger;
 
-@Host("api.")
+@Host({"api.", "server"})
 @Path("/api/v1/me/email")
 @WebEngine.HttpMethod("POST")
 public final class EmailHandler implements Handler {
