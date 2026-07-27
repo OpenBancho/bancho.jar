@@ -36,7 +36,7 @@ import static com.osuserverlist.bjar.handlers.api.me.MeSupport.hash;
 import static com.osuserverlist.bjar.handlers.api.me.MeSupport.logger;
 import static com.osuserverlist.bjar.handlers.api.me.MeSupport.sessionsOf;
 
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/me/password")
 @WebEngine.HttpMethod("POST")
 public final class PasswordHandler implements Handler {

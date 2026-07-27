@@ -28,7 +28,7 @@ import io.javalin.http.HttpStatus;
  * header, delegated to {@link LoginHandler}) and subsequent packet exchange
  * for already-connected players.
  */
-@Host({ "c.", "c4." })
+@Host({ "c.", "c1", "c2", "c3", "c4.", "c5.", "c6.", "ce." })
 @Path("/")
 @HttpMethod("POST")
 public class ChoHandler implements Handler {

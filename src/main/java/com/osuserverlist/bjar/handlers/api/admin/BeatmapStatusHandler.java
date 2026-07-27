@@ -20,7 +20,7 @@ import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiResponse;
 
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/admin/beatmap/status")
 @WebEngine.HttpMethod("POST")
 public final class BeatmapStatusHandler implements Handler {

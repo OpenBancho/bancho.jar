@@ -29,7 +29,7 @@ import static com.osuserverlist.bjar.handlers.api.oauth.OAuthSupport.clearCookie
 import static com.osuserverlist.bjar.handlers.api.oauth.OAuthSupport.logger;
 import static com.osuserverlist.bjar.handlers.api.oauth.OAuthSupport.oauthError;
 
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/oauth/token")
 @WebEngine.HttpMethod("POST")
 public final class TokenHandler implements Handler {

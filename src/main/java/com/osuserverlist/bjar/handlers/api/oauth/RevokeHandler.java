@@ -19,7 +19,7 @@ import io.javalin.openapi.OpenApiResponse;
 import static com.osuserverlist.bjar.handlers.api.oauth.OAuthSupport.Params;
 import static com.osuserverlist.bjar.handlers.api.oauth.OAuthSupport.clearCookies;
 
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/oauth/revoke")
 @WebEngine.HttpMethod("POST")
 public final class RevokeHandler implements Handler {

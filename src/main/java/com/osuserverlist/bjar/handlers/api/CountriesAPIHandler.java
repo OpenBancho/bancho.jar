@@ -30,7 +30,7 @@ import io.javalin.openapi.OpenApiResponse;
  * would leave most of the entries empty, and the front end has no way of
  * knowing which ones are populated.</p>
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_countries")
 @HttpMethod("GET")
 public class CountriesAPIHandler implements Handler {

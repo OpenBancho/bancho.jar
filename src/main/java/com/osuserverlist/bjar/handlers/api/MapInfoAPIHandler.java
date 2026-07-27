@@ -24,7 +24,7 @@ import io.javalin.openapi.OpenApiResponse;
 /**
  * GET /api/v1/get_map_info — metadata for a single beatmap. Scalar endpoint.
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_map_info")
 @HttpMethod("GET")
 public class MapInfoAPIHandler implements Handler {

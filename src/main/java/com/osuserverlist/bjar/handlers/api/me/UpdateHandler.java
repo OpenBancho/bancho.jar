@@ -32,7 +32,7 @@ import static com.osuserverlist.bjar.handlers.api.me.MeSupport.MAX_PLAY_STYLE;
 import static com.osuserverlist.bjar.handlers.api.me.MeSupport.MAX_USERPAGE_LENGTH;
 import static com.osuserverlist.bjar.handlers.api.me.MeSupport.logger;
 
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/me/update")
 @WebEngine.HttpMethod("POST")
 public final class UpdateHandler implements Handler {

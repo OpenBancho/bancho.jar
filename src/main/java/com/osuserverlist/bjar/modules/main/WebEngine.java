@@ -190,15 +190,28 @@ public class WebEngine {
             return host.toLowerCase(Locale.ROOT);
         }
 
+        private String extractSubdomain(String host) {
+            if (host.equals(App.server.enviromentConfig.getDomain())) {
+                return "";
+            }
+
+            String suffix = "." + App.server.enviromentConfig.getDomain();
+            if (host.endsWith(suffix)) {
+                String remainder = host.substring(0, host.length() - suffix.length());
+                int dotIndex = remainder.indexOf('.');
+                return dotIndex > 0 ? remainder.substring(0, dotIndex) : remainder;
+            }
+
+            return host;
+        }
+
         void dispatch(Context ctx) throws Exception {
             String host = extractHost(ctx);
 
             Handler handler = exactHosts.get(host);
 
             if (handler == null) {
-                int dotIndex = host.indexOf('.');
-                String subdomain = dotIndex > 0 ? host.substring(0, dotIndex) : host;
-                handler = subdomainHosts.get(subdomain);
+                handler = subdomainHosts.get(extractSubdomain(host));
             }
 
             if (handler == null) {

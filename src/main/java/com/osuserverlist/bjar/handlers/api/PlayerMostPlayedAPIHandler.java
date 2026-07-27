@@ -28,7 +28,7 @@ import io.javalin.openapi.OpenApiResponse;
  * GET /api/v1/get_player_most_played — a player's most-played beatmaps for a
  * mode. {@code count} is the number of distinct beatmaps played in that mode.
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_player_most_played")
 @HttpMethod("GET")
 public class PlayerMostPlayedAPIHandler implements Handler {

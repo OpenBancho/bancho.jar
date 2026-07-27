@@ -27,7 +27,7 @@ import io.javalin.openapi.OpenApiResponse;
  * for mirrored osu! sets and for sets uploaded here through the submission
  * system.
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_beatmapset")
 @WebEngine.HttpMethod("GET")
 public class BeatmapsetInfoAPIHandler implements Handler {

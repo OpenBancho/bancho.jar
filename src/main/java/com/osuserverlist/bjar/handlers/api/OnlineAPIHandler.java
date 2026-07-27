@@ -27,7 +27,7 @@ import io.javalin.openapi.OpenApiResponse;
  * GET /api/v1/online — the list of players currently online (bots and auxiliary
  * tournament-client sessions excluded, deduplicated by user id).
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/online")
 @HttpMethod("GET")
 public class OnlineAPIHandler implements Handler {

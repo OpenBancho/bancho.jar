@@ -25,7 +25,7 @@ import io.javalin.openapi.OpenApiResponse;
  * GET /api/v1/get_score_info — a single score with its beatmap embedded.
  * Scalar endpoint.
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_score_details")
 @HttpMethod("GET")
 public class ScoreInfoAPIHandler implements Handler {

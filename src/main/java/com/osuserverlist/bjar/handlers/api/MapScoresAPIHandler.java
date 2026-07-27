@@ -31,7 +31,7 @@ import io.javalin.openapi.OpenApiResponse;
  *
  * <p>Scores are ordered by score descending.
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_map_scores")
 @HttpMethod("GET")
 public class MapScoresAPIHandler implements Handler {

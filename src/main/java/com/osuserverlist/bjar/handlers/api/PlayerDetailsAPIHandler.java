@@ -27,7 +27,7 @@ import io.javalin.openapi.OpenApiResponse;
  * GET /api/v1/get_player_info — a single player's profile and/or per-mode
  * stats. Scalar (non-list) endpoint.
  */
-@Host({"api.", "server"})
+@Host({"api.", "server", ""})
 @Path("/api/v1/get_player_details")
 @HttpMethod("GET")
 public class PlayerDetailsAPIHandler implements Handler {
