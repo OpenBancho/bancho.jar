@@ -17,6 +17,7 @@ import com.osuserverlist.bjar.modules.datastore.Redis;
 import com.osuserverlist.bjar.modules.main.GeoLocation;
 import com.osuserverlist.bjar.packets.server.UtilServerPackets.NotificationPacket;
 import com.osuserverlist.bjar.repos.BeatmapRepository;
+import com.osuserverlist.bjar.repos.LogRepository;
 import com.osuserverlist.bjar.repos.StatsRepository;
 import com.osuserverlist.bjar.repos.UserRepository;
 
@@ -67,6 +68,7 @@ public final class AdminActions {
         }
 
         logger.info("Admin <{}> restricted user <{}> (reason: {})", actorId, userId, reason);
+        record(actorId, userId, "restrict", reason);
 
         return true;
     }
@@ -100,6 +102,7 @@ public final class AdminActions {
         }
 
         logger.info("Admin <{}> unrestricted user <{}> (reason: {})", actorId, userId, reason);
+        record(actorId, userId, "unrestrict", reason);
 
         return true;
     }
@@ -153,6 +156,7 @@ public final class AdminActions {
 
         logger.info("Admin <{}> wiped {} score(s) of user <{}> in mode <{}>",
                 actorId, scores.size(), userId, mode);
+        record(actorId, userId, "wipe", "Wiped " + scores.size() + " score(s) in mode " + mode + ".");
 
         return true;
     }
@@ -205,6 +209,7 @@ public final class AdminActions {
         }
 
         logger.info("Admin <{}> granted donator to user <{}> until <{}>", actorId, userId, newEnd);
+        record(actorId, userId, "supporter", "Supporter until " + newEnd + " (added " + seconds + "s).");
 
         return newEnd;
     }
@@ -246,6 +251,8 @@ public final class AdminActions {
         }
 
         logger.info("Admin <{}> set privileges of user <{}> to <{}>", actorId, userId, privileges);
+        record(actorId, userId, "privileges",
+                (add ? "Granted " : "Removed ") + privs + " (bitmask is now " + privileges + ").");
 
         return privileges;
     }
@@ -292,6 +299,7 @@ public final class AdminActions {
         }
 
         logger.info("Admin <{}> changed country of user <{}> to <{}>", actorId, userId, code);
+        record(actorId, userId, "country", "Country set to " + code + ".");
 
         return true;
     }
@@ -316,6 +324,100 @@ public final class AdminActions {
         }
 
         logger.info("Admin <{}> changed name of user <{}> to <{}>", actorId, userId, newName);
+        record(actorId, userId, "name", "Renamed to " + newName + ".");
+
+        return true;
+    }
+
+    // ------------------------------------------------------------------
+    // silence / unsilence
+    // ------------------------------------------------------------------
+
+    /**
+     * Silences an account for a number of seconds, stopping it from posting in chat while
+     * leaving it able to play.
+     *
+     * <p>A silence is not a restriction, which is why it lives next to one rather than inside
+     * it: the punishment ladder in practice starts here, and a moderator reaching for it
+     * should not have to take someone's scores away to use it.</p>
+     *
+     * @return the unix second the silence expires at, or {@code -1} on an unknown user.
+     */
+    public static long silence(int actorId, int userId, long seconds, String reason) {
+        UserEntity user = UserRepository.findById(userId);
+        if (user == null) {
+            return -1;
+        }
+
+        long now = System.currentTimeMillis() / 1000L;
+        int silenceEnd = (int) (now + seconds);
+
+        user.setSilenceEnd(silenceEnd);
+        UserRepository.save(user);
+
+        String message = reason == null || reason.isBlank()
+                ? "You have been silenced."
+                : "You have been silenced: " + reason;
+
+        for (Player player : sessionsOf(userId)) {
+            player.setSilenceEnd(silenceEnd);
+            player.sendPacket(new NotificationPacket(message));
+            App.server.playerManager.silence(player, silenceEnd);
+        }
+
+        logger.info("Admin <{}> silenced user <{}> for <{}s> (reason: {})",
+                actorId, userId, seconds, reason);
+        record(actorId, userId, "silence",
+                "Silenced for " + seconds + "s. " + (reason == null ? "" : reason));
+
+        return silenceEnd;
+    }
+
+    /** Lifts a silence early. @return {@code false} when the target user does not exist. */
+    public static boolean unsilence(int actorId, int userId, String reason) {
+        UserEntity user = UserRepository.findById(userId);
+        if (user == null) {
+            return false;
+        }
+
+        user.setSilenceEnd(0);
+        UserRepository.save(user);
+
+        String message = reason == null || reason.isBlank()
+                ? "You are no longer silenced."
+                : "You are no longer silenced: " + reason;
+
+        for (Player player : sessionsOf(userId)) {
+            player.setSilenceEnd(0);
+            player.sendPacket(new NotificationPacket(message));
+            App.server.playerManager.unsilence(player);
+        }
+
+        logger.info("Admin <{}> unsilenced user <{}> (reason: {})", actorId, userId, reason);
+        record(actorId, userId, "unsilence", reason);
+
+        return true;
+    }
+
+    // ------------------------------------------------------------------
+    // notes
+    // ------------------------------------------------------------------
+
+    /**
+     * Attaches a free text note to an account without doing anything to it.
+     *
+     * <p>Most of what moderation actually consists of is not a punishment: it is the sentence
+     * explaining why the next person should, or should not, hand one out. Without somewhere to
+     * put that, it ends up in a private Discord channel and is lost.</p>
+     *
+     * @return {@code false} when the target user does not exist.
+     */
+    public static boolean note(int actorId, int userId, String message) {
+        if (!UserRepository.exists(userId)) {
+            return false;
+        }
+
+        record(actorId, userId, "note", message);
 
         return true;
     }
@@ -323,6 +425,21 @@ public final class AdminActions {
     // ------------------------------------------------------------------
     // helpers
     // ------------------------------------------------------------------
+
+    /**
+     * Appends one line to the staff history.
+     *
+     * <p>Failures are swallowed on purpose: the action itself has already happened by the time
+     * this runs, and a database hiccup here must not turn a completed restriction into a 500
+     * that invites the moderator to do it a second time.</p>
+     */
+    private static void record(int actorId, int userId, String action, String message) {
+        try {
+            LogRepository.write(actorId, userId, action, message);
+        } catch (Exception e) {
+            logger.warn("Could not record the <{}> of user <{}> in the staff log", action, userId, e);
+        }
+    }
 
     /**
      * Returns a snapshot of every live session belonging to a user. A snapshot is required

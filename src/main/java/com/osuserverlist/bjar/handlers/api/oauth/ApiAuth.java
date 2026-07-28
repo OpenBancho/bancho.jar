@@ -168,6 +168,29 @@ public final class ApiAuth {
         return requirePermission(ctx, token, SCOPE_ADMIN, Privileges.ADMINISTRATOR);
     }
 
+    /**
+     * Looking at the machine: memory, threads, load.
+     *
+     * <p>Deliberately its own capability rather than a corner of the administrator one. Knowing
+     * how hot the box is running is not the same job as deciding who is allowed to play on it,
+     * and the person who needs the graphs is usually not the person handing out bans.</p>
+     */
+    public static boolean requireDeveloper(Context ctx, OAuthToken token) {
+        return requirePermission(ctx, token, SCOPE_ADMIN, Privileges.DEVELOPER);
+    }
+
+    /**
+     * Opening the panel at all.
+     *
+     * <p>Any single staff capability is enough to get through the door; which rooms are then
+     * lit up is decided per section. This exists so that the sidebar can be built for the
+     * caller instead of the caller guessing which links will 403.</p>
+     */
+    public static boolean requireStaff(Context ctx, OAuthToken token) {
+        return requireAny(ctx, token, Privileges.NOMINATOR, Privileges.MODERATOR,
+                Privileges.ADMINISTRATOR, Privileges.DEVELOPER);
+    }
+
     /** Writes an OAuth2 style {@code 401}. */
     public static void unauthorized(Context ctx, String error, String description) {
         ctx.status(401).header("WWW-Authenticate",

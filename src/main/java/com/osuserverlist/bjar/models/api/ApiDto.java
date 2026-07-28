@@ -595,4 +595,179 @@ public final class ApiDto {
         private int total;
         private List<Achievement> results;
     }
+
+    // ----- admin panel --------------------------------------------------
+
+    @Data
+    public static class SilenceRequest {
+        private int user_id;
+        /** Duration such as 30m, 2h, 1d, or a bare number of seconds. */
+        private String duration;
+        private String reason;
+    }
+
+    @Data
+    public static class SilenceResponse {
+        private String status;
+        /** Unix second the silence expires at. */
+        private long silence_end;
+    }
+
+    @Data
+    public static class NoteRequest {
+        private int user_id;
+        private String message;
+    }
+
+    /** One line of an account's staff history. */
+    @Data
+    public static class StaffLogEntry {
+        private int id;
+        /** The staff member who acted, or 0 when the server itself did. */
+        private int from_id;
+        private String from_name;
+        private int to_id;
+        private String to_name;
+        /** restrict, unrestrict, silence, unsilence, wipe, supporter, privileges, name, country, note. */
+        private String action;
+        private String message;
+        /** ISO-8601 local date-time. */
+        private String time;
+    }
+
+    @Data
+    public static class PaginatedStaffLogs {
+        private String status;
+        private int offset;
+        private int limit;
+        private long count;
+        private List<StaffLogEntry> results;
+    }
+
+    /** A player as the moderation list shows them. */
+    @Data
+    public static class AdminPlayer {
+        private int id;
+        private String name;
+        private String country;
+        private int priv;
+        private boolean restricted;
+        private boolean silenced;
+        private long silence_end;
+        private long donor_end;
+        private boolean supporter;
+        private boolean online;
+        /** Human readable privilege names, for badges. */
+        private List<String> roles;
+        private long creation_time;
+        private long latest_activity;
+    }
+
+    @Data
+    public static class PaginatedAdminPlayers {
+        private String status;
+        private int offset;
+        private int limit;
+        private long count;
+        private List<AdminPlayer> results;
+    }
+
+    @Data
+    public static class AdminPlayerResponse {
+        private String status;
+        private AdminPlayer player;
+        private String email;
+        /** The account's staff history, newest first. */
+        private List<StaffLogEntry> logs;
+        /** Per-mode totals, so a moderator can judge an account without leaving the page. */
+        private List<Stats> stats;
+    }
+
+    /** A pending rank request as the nominator queue shows it. */
+    @Data
+    public static class AdminRequest {
+        private int map_id;
+        private int set_id;
+        private String artist;
+        private String title;
+        private String version;
+        private String creator;
+        private int status;
+        private int mode;
+        private double stars;
+        private int requested_by_id;
+        private String requested_by;
+        private long requested_at;
+        private boolean active;
+    }
+
+    @Data
+    public static class PaginatedAdminRequests {
+        private String status;
+        private int offset;
+        private int limit;
+        private long count;
+        private List<AdminRequest> results;
+    }
+
+    @Data
+    public static class ResolveRequestRequest {
+        private int map_id;
+        /** Either accept or reject. */
+        private String action;
+        /** Optional target status when accepting: 1 ranked, 2 approved, 4 loved. Defaults to 1. */
+        private int status;
+        /** When true, the whole beatmapset is resolved rather than the single difficulty. */
+        private boolean whole_set;
+    }
+
+    /** Server load, for the developer page. */
+    @Data
+    public static class SystemStatsResponse {
+        private String status;
+        private String version;
+        /** Milliseconds the JVM has been up. */
+        private long uptime_ms;
+        private long heap_used;
+        private long heap_committed;
+        private long heap_max;
+        private long non_heap_used;
+        /** Bytes the JVM believes it can still allocate. */
+        private long memory_free;
+        private long memory_total;
+        private int threads;
+        private int threads_peak;
+        private int cpu_cores;
+        /** Recent JVM CPU load, 0..1, or -1 when the platform will not say. */
+        private double cpu_process;
+        /** Recent system-wide CPU load, 0..1, or -1 when the platform will not say. */
+        private double cpu_system;
+        /** One-minute load average, or -1 on platforms without one. */
+        private double load_average;
+        private long gc_count;
+        private long gc_time_ms;
+        /** Live bancho sessions, bots excluded. */
+        private int online_players;
+        private int registered_players;
+        private int restricted_players;
+        private int silenced_players;
+        private int multiplayer_matches;
+        private int chat_channels;
+        private String java_version;
+        private String os;
+    }
+
+    /** What the caller is allowed to see and do. Drives the sidebar. */
+    @Data
+    public static class AdminAccessResponse {
+        private String status;
+        private int id;
+        private String name;
+        private int priv;
+        private List<String> roles;
+        /** Section keys the caller may open: requests, moderation, logs, server. */
+        private List<String> sections;
+        /** Action keys the caller may use: restrict, silence, note, wipe, supporter, privileges, rename, country, alert, rank. */
+        private List<String> actions;
+    }
 }
