@@ -289,6 +289,51 @@ CREATE TABLE
 	) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 CREATE TABLE
+    IF NOT EXISTS `staff_logs` (
+        `id` INT NOT NULL AUTO_INCREMENT,
+        -- The staff member who acted. 0 is the server itself.
+        `from_id` INT NOT NULL,
+        -- The account that was acted upon. For a rank decision this is the
+        -- beatmap id instead, which is why there is no foreign key here.
+        `to_id` INT NOT NULL,
+        -- A stable machine name: restrict, unrestrict, silence, unsilence,
+        -- wipe, supporter, privileges, name, country, note, rank.
+        `action` VARCHAR(32) NOT NULL,
+        -- The reason or detail the staff member typed.
+        `msg` VARCHAR(2048) NULL DEFAULT NULL,
+        `time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`),
+        -- The panel reads a single player's history, newest first.
+        INDEX `staff_logs_to_id_time` (`to_id`, `time` DESC),
+        INDEX `staff_logs_from_id_time` (`from_id`, `time` DESC),
+        INDEX `staff_logs_action` (`action`)
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `bss_mapsets` (
+  `set_id`            INT          NOT NULL,
+  `creator_id`        INT          NOT NULL,
+  `creator_name`      VARCHAR(32)  NOT NULL,
+  `artist`            VARCHAR(128)     NULL,
+  `title`             VARCHAR(128)     NULL,
+  `osz2_hash`         VARCHAR(32)      NULL,
+  `topic_id`          INT              NULL,
+  `subject`           VARCHAR(128)     NULL,
+  `message`           TEXT             NULL,
+  `status`            INT          NOT NULL DEFAULT 0,
+  `submission_date`   DATETIME         NULL,
+  `last_update`       DATETIME         NULL,
+  `revision`          INT          NOT NULL DEFAULT 0,
+  `has_video`         TINYINT(1)   NOT NULL DEFAULT 0,
+  `filesize`          INT          NOT NULL DEFAULT 0,
+  `filesize_novideo`  INT          NOT NULL DEFAULT 0,
+  `active`            TINYINT(1)   NOT NULL DEFAULT 1,
+  PRIMARY KEY (`set_id`),
+  KEY `bss_mapsets_creator_id` (`creator_id`),
+  KEY `bss_mapsets_active` (`active`),
+  KEY `bss_mapsets_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE
 	`user_achievements` (`userid` int NOT NULL, `achid` int NOT NULL) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
 ALTER TABLE `achievements` ADD PRIMARY KEY (`id`),
