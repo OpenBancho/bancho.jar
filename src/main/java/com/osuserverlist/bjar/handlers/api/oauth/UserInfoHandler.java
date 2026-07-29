@@ -27,7 +27,9 @@ public final class UserInfoHandler implements Handler {
     @Override
     @OpenApi(
         summary = "Token owner",
-        description = "Who the current access token belongs to, plus its scope, client and expiry.",
+        description = "Who the current access token belongs to, plus its scope, client and expiry. "
+            + "Answers for unverified accounts too, with verified=false, so a client can tell "
+            + "an account waiting for its first in-game login apart from a dead token.",
         tags = { "OAuth" },
         headers = {
             @OpenApiParam(
@@ -51,22 +53,33 @@ public final class UserInfoHandler implements Handler {
         methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
-        OAuthToken token = ApiAuth.require(ctx);
+        // The one authenticated endpoint an unverified account may still call. It has to be:
+        // this is where the website asks whether the account has been verified yet, and an
+        // answer of "you are not verified" is useless if asking for it is itself a 401.
+        OAuthToken token = ApiAuth.requireAllowUnverified(ctx);
 
         if (token == null) {
             return;
         }
 
+        boolean verified = ApiAuth.isVerified(token.getPrivileges());
+
         Map<String, Object> user = new LinkedHashMap<>();
         user.put("id", token.getUserId());
         user.put("name", token.getUsername());
         user.put("priv", token.getPrivileges());
+        user.put("verified", verified);
 
         Map<String, Object> body = ApiAuth.success();
         body.put("user", user);
         body.put("scope", token.getScope());
         body.put("client_id", token.getClientId());
         body.put("expires_at", token.getExpiresAt());
+        body.put("verified", verified);
+
+        if (!verified) {
+            body.put("message", ApiAuth.UNVERIFIED_MSG);
+        }
 
         ctx.json(body);
     }

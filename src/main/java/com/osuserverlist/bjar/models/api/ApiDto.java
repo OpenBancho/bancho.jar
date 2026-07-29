@@ -3,6 +3,8 @@ package com.osuserverlist.bjar.models.api;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 /**
@@ -308,6 +310,53 @@ public final class ApiDto {
         private String status;
     }
 
+    // ----- registration --------------------------------------------------
+
+    @Data
+    public static class RegisterRequest {
+        private String username;
+        private String email;
+        private String password;
+
+        /**
+         * The token the Cloudflare Turnstile widget produced. Required whenever
+         * the server has TURNSTILE_SECRET_KEY set.
+         */
+        @JsonProperty("cf-turnstile-response")
+        private String cfTurnstileResponse;
+
+        /** Scopes for the token pair issued on success, e.g. {@code identify profile}. */
+        private String scope;
+        private String client_id;
+    }
+
+    @Data
+    public static class RegisterResponse {
+        private String status;
+        private TokenUser user;
+        private String access_token;
+        private String token_type;
+        private long expires_in;
+        private String refresh_token;
+        private long refresh_expires_in;
+        private String scope;
+
+        /**
+         * Always false here: a brand new account still has to log into the game once before
+         * its token opens anything.
+         */
+        private boolean verified;
+
+        private String message;
+    }
+
+    /** A rejected registration: one readable line, plus the messages per field. */
+    @Data
+    public static class RegisterErrorResponse {
+        private String status;
+        private Map<String, List<String>> errors;
+    }
+
     // ----- oauth2 --------------------------------------------------------
 
     @Data
@@ -347,6 +396,12 @@ public final class ApiDto {
         private int id;
         private String name;
         private int priv;
+
+        /**
+         * False until the account has logged into the game once. While it is false the token
+         * is accepted only by the userinfo endpoint; everything else answers {@code 401}.
+         */
+        private boolean verified;
     }
 
     @Data
@@ -356,6 +411,12 @@ public final class ApiDto {
         private String scope;
         private String client_id;
         private long expires_at;
+
+        /** Whether the account behind the token has completed its in-game login. */
+        private boolean verified;
+
+        /** Only present when {@code verified} is false: what the owner has to do about it. */
+        private String message;
     }
 
     /** RFC 6749 error body used by the oauth endpoints. */

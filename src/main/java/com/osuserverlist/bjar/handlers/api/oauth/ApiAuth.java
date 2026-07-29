@@ -27,6 +27,10 @@ import io.javalin.http.Context;
 public final class ApiAuth {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /** Told to every caller whose account has not logged into the game yet. */
+    public static final String UNVERIFIED_MSG = "This account is not verified yet. "
+            + "Log into the game once with it to finish signing up.";
+
     /** Read the caller's own identity. Granted to every token by default. */
     public static final String SCOPE_IDENTIFY = "identify";
 
@@ -64,6 +68,33 @@ public final class ApiAuth {
      * so handlers can simply {@code return} on a null result.</p>
      */
     public static OAuthToken require(Context ctx) {
+        OAuthToken token = requireAllowUnverified(ctx);
+
+        if (token == null) {
+            return null;
+        }
+
+        // An account registered on the website is not a usable account yet. It is handed a
+        // token pair right away so the browser has a session to sit in, but that token opens
+        // nothing until the player has logged into the game once with it, which is the only
+        // proof this side ever gets that the account belongs to whoever made it. The game
+        // login sets VERIFIED, so this gate lifts itself the moment they connect.
+        if (!isVerified(token.getPrivileges())) {
+            unauthorized(ctx, "account_unverified", UNVERIFIED_MSG);
+            return null;
+        }
+
+        return token;
+    }
+
+    /**
+     * The same resolution as {@link #require(Context)} without the verification gate.
+     *
+     * <p>Reserved for the few endpoints an unverified account still has to be able to call:
+     * asking who it is, and being told it is not verified yet. Everything else goes through
+     * {@code require}.</p>
+     */
+    public static OAuthToken requireAllowUnverified(Context ctx) {
         OAuthToken token = TokenStore.resolveAccess(bearer(ctx));
 
         if (token == null) {
@@ -84,6 +115,11 @@ public final class ApiAuth {
         token.setUsername(user.getName());
 
         return token;
+    }
+
+    /** Whether an account has completed the in-game login that verifies it. */
+    public static boolean isVerified(int privileges) {
+        return Privileges.has(privileges, Privileges.VERIFIED);
     }
 
     /** Checks that the token was granted a scope. Writes {@code 403} when it was not. */
