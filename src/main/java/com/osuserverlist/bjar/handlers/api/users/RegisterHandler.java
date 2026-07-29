@@ -10,13 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.osuserverlist.bjar.App;
 import com.osuserverlist.bjar.handlers.api.oauth.ApiAuth;
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.database.UserEntity;
 import com.osuserverlist.bjar.modules.account.RegistrationService;
 import com.osuserverlist.bjar.modules.api.TokenStore;
-import com.osuserverlist.bjar.modules.main.Turnstile;
+import com.osuserverlist.bjar.modules.main.Captcha;
 import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
@@ -90,11 +89,6 @@ public final class RegisterHandler implements Handler {
         methods = HttpMethod.POST
     )
     public void handle(@NotNull Context ctx) {
-        if (!App.server.enviromentConfig.isWebRegistrationEnabled()) {
-            ctx.status(403).json(Map.of("status", "Registration is currently disabled on this server."));
-            return;
-        }
-
         Params params = Params.of(ctx);
 
         String username = params.get("username");
@@ -106,10 +100,7 @@ public final class RegisterHandler implements Handler {
             return;
         }
 
-        // One token, one verification: this happens before anything is written,
-        // and before the database is asked whether the name is free, so a bot
-        // cannot use the endpoint to probe for taken usernames either.
-        Turnstile.Result captcha = Turnstile.verify(params.get(Turnstile.FIELD), ctx.ip());
+        Captcha.Result captcha = Captcha.verify(params.get(Captcha.field()), ctx.ip());
 
         if (!captcha.isSuccess()) {
             ctx.status(400).json(Map.of(

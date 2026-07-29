@@ -167,15 +167,8 @@ public class Server {
         private String dlEndpoint;
         private boolean ingameRegistrationEnabled;
 
-        /** Registration through POST /api/v1/users/register, used by the website. */
-        private boolean webRegistrationEnabled;
-
-        /**
-         * Secret key of the Cloudflare Turnstile widget. Empty turns the
-         * captcha off, which is why it is a key and not a boolean: there is no
-         * way to ask for a captcha without being able to verify one.
-         */
-        private String turnstileSecretKey;
+        private String captchaProvider;
+        private String captchaSecretKey;
 
         private boolean ircEnabled;
         private int ircPort;

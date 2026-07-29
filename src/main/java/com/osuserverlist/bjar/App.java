@@ -111,11 +111,9 @@ public class App {
             config.setSearchEndpoint(dotenv.get("DIRECT_SEARCH"));
 
             config.setIngameRegistrationEnabled(Boolean.parseBoolean(dotenv.get("INGAME_REGISTRATION_ENABLED")));
-            config.setWebRegistrationEnabled(
-                    Boolean.parseBoolean(dotenv.get("WEB_REGISTRATION_ENABLED", "true")));
-
-            // Empty means no captcha at all; see Turnstile.
-            config.setTurnstileSecretKey(dotenv.get("TURNSTILE_SECRET_KEY", ""));
+            
+            config.setCaptchaProvider(dotenv.get("CAPTCHA_PROVIDER", "NONE"));
+            config.setCaptchaSecretKey(dotenv.get("CAPTCHA_SECRET_KEY", ""));
 
             config.setIrcEnabled(Boolean.parseBoolean(dotenv.get("IRC_ENABLED", "false")));
             config.setIrcPort(Integer.parseInt(dotenv.get("IRC_PORT", "6667")));
