@@ -92,6 +92,7 @@ public final class MeHandler implements Handler {
         info.put("userpage_content", user.getUserpageContent());
         info.put("custom_badge_name", user.getCustomBadgeName());
         info.put("custom_badge_icon", user.getCustomBadgeIcon());
+        info.put("custom_banner", user.getCustomBanner());
 
         Map<String, Object> statsByMode = new LinkedHashMap<>();
         for (StatsEntity stats : StatsRepository.findAllByUser(user.getId())) {

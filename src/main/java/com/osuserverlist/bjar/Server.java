@@ -123,6 +123,12 @@ public class Server {
                 ctx.status(500).result("Internal Server Error");
             });
 
+            // Javalin refuses a body over 1 MB by default, which is less than a
+            // cropped banner or a decent avatar weighs, and answers 413 before any
+            // handler runs. The uploads have their own, tighter checks, so this
+            // only has to be above the largest of them.
+            config.http.maxRequestSize = 8L * 1024 * 1024;
+
             config.concurrency.useVirtualThreads = true;
             config.requestLogger.http(new BanchoWebLogger());
 

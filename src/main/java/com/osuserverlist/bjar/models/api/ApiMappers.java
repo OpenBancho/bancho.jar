@@ -56,6 +56,9 @@ public final class ApiMappers {
         // public mapper rather than only in the owner's own view.
         map.put("custom_badge_name", user.getCustomBadgeName());
         map.put("custom_badge_icon", user.getCustomBadgeIcon());
+        // The cover picture is part of how a profile looks to visitors, so it is
+        // public as well; the site draws it at the top of the page.
+        map.put("custom_banner", user.getCustomBanner());
         map.put("creation_time", user.getCreationTime());
         map.put("latest_activity", user.getLatestActivity());
         return map;

@@ -147,6 +147,26 @@ public final class UpdateHandler implements Handler {
             changed = true;
         }
 
+        // A banner is changed by uploading one, so the only thing this route can do
+        // with it is take it away again. Accepting a path here would let an account
+        // point its cover at any file the server happens to serve.
+        if (body.has("custom_banner")) {
+            if (!DonorService.isDonor(user)) {
+                ctx.status(403).json(ApiPagination.error(
+                        "A profile banner is a supporter perk."));
+                return;
+            }
+
+            if (!body.get("custom_banner").isNull()) {
+                ApiAuth.badRequest(ctx, "A banner is set by uploading one, so "
+                        + "custom_banner may only be null.");
+                return;
+            }
+
+            user.setCustomBanner(null);
+            changed = true;
+        }
+
         boolean touchesBadge = body.has("custom_badge_name") || body.has("custom_badge_icon");
 
         // A custom badge is a supporter perk. Supporter is either the timed

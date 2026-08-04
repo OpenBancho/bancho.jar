@@ -31,41 +31,46 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 
 /**
- * The picture of a custom badge, uploaded rather than linked.
+ * The cover picture at the top of a profile, uploaded rather than linked.
  *
- * <p>A link would leave the badge at the mercy of whatever host it points at,
- * and would let one account decide what every visitor of its profile fetches.
- * The image is therefore stored here, the same way avatars are: the upload is
- * decoded, bounded and written out again as a fresh PNG, so nothing of the
- * original file (name, metadata, appended bytes, extra frames) survives.</p>
+ * <p>Same reasoning as the badge picture: a link would leave the banner at the
+ * mercy of whatever host it points at, and would let one account decide what
+ * every visitor of its profile fetches. The upload is decoded, bounded and
+ * written out again as a fresh PNG, so nothing of the original file (name,
+ * metadata, appended bytes, extra frames) survives.</p>
  *
- * <p>The stored path is written straight onto the account, so a successful
- * upload is all it takes for the badge picture to change.</p>
+ * <p>A banner is a supporter perk, so the same donor check as the badge guards
+ * it, and the stored path is written straight onto the account.</p>
  */
 @Host({"api.", "server", ""})
-@Path("/api/v1/me/badge")
+@Path("/api/v1/me/banner")
 @WebEngine.HttpMethod("POST")
-public final class BadgeIconHandler implements Handler {
+public final class BannerHandler implements Handler {
 
-    private static final int MAX_FILE_BYTES = 2 * 1024 * 1024;
+    /** A cover is a large picture, so it gets more room than a badge does. */
+    private static final int MAX_FILE_BYTES = 4 * 1024 * 1024;
 
-    private static final int MAX_SIDE = 4096;
+    private static final int MAX_SIDE = 6000;
 
-    private static final long MAX_PIXELS = 16_000_000L;
+    private static final long MAX_PIXELS = 24_000_000L;
 
-    /** A badge icon is drawn 48x24, so 192px wide covers every display scale. */
-    private static final int MAX_OUTPUT_WIDTH = 192;
+    /** Wider than the profile card ever gets, so it still looks sharp on 2x screens. */
+    private static final int MAX_OUTPUT_WIDTH = 1600;
 
-    /** Badges are landscape plates: every picture is stored twice as wide as it is tall. */
-    private static final int ASPECT_WIDTH = 2;
+    /** Covers are wide strips: every picture is stored four times as wide as it is tall. */
+    private static final int ASPECT_WIDTH = 4;
 
     private static final int ASPECT_HEIGHT = 1;
 
-    static final java.nio.file.Path BADGE_DIR =
-            java.nio.file.Path.of("data", "assets", "badges").toAbsolutePath().normalize();
+    private static final int MIN_WIDTH = 200;
+
+    private static final int MIN_HEIGHT = 50;
+
+    static final java.nio.file.Path BANNER_DIR =
+            java.nio.file.Path.of("data", "assets", "banners").toAbsolutePath().normalize();
 
     /** Where the browser reads it back from; short enough for the 64 char column. */
-    static final String PUBLIC_PREFIX = "/api/v1/badge/";
+    static final String PUBLIC_PREFIX = "/api/v1/banner/";
 
     static {
         ImageIO.setUseCache(false);
@@ -85,13 +90,13 @@ public final class BadgeIconHandler implements Handler {
         }
 
         if (!DonorService.isDonor(user)) {
-            ctx.status(403).json(ApiPagination.error("A custom badge is a supporter perk."));
+            ctx.status(403).json(ApiPagination.error("A profile banner is a supporter perk."));
             return;
         }
 
         String contentType = ctx.contentType();
         if (contentType == null || !contentType.equalsIgnoreCase("image/png")) {
-            ctx.status(415).json(Map.of("status", "Only a PNG badge picture is accepted."));
+            ctx.status(415).json(Map.of("status", "Only a PNG banner is accepted."));
             return;
         }
 
@@ -124,28 +129,28 @@ public final class BadgeIconHandler implements Handler {
             return;
         }
 
-        if (source == null || source.getWidth() < 16 || source.getHeight() < 16
+        if (source == null || source.getWidth() < MIN_WIDTH || source.getHeight() < MIN_HEIGHT
                 || source.getWidth() > MAX_SIDE || source.getHeight() > MAX_SIDE
                 || (long) source.getWidth() * source.getHeight() > MAX_PIXELS) {
             invalid(ctx);
             return;
         }
 
-        BufferedImage icon = normalise(source);
+        BufferedImage banner = normalise(source);
         String filename = user.getId() + ".png";
-        java.nio.file.Path target = BADGE_DIR.resolve(filename).normalize();
+        java.nio.file.Path target = BANNER_DIR.resolve(filename).normalize();
         java.nio.file.Path temporary = null;
 
-        if (!target.getParent().equals(BADGE_DIR)) {
-            ctx.status(500).json(Map.of("status", "Could not store the badge picture."));
+        if (!target.getParent().equals(BANNER_DIR)) {
+            ctx.status(500).json(Map.of("status", "Could not store the banner."));
             return;
         }
 
         try {
-            Files.createDirectories(BADGE_DIR);
-            temporary = Files.createTempFile(BADGE_DIR, ".badge-", ".png");
+            Files.createDirectories(BANNER_DIR);
+            temporary = Files.createTempFile(BANNER_DIR, ".banner-", ".png");
 
-            if (!ImageIO.write(icon, "png", temporary.toFile())) {
+            if (!ImageIO.write(banner, "png", temporary.toFile())) {
                 throw new IOException("PNG writer unavailable");
             }
 
@@ -156,27 +161,23 @@ public final class BadgeIconHandler implements Handler {
                 Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // The version guards against a browser showing the previous picture
-            // after a replacement, since the path itself never changes.
-            String icons = PUBLIC_PREFIX + filename;
+            String path = PUBLIC_PREFIX + filename;
 
-            user.setCustomBadgeIcon(icons);
+            user.setCustomBanner(path);
             UserRepository.save(user);
 
             ctx.header("Cache-Control", "no-store");
 
             Map<String, Object> response = ApiAuth.success();
-            response.put("custom_badge_icon", icons);
-            response.put("custom_badge_name", user.getCustomBadgeName());
+            response.put("custom_banner", path);
 
             ctx.json(response);
 
-            MeSupport.logger.info("User <{}> updated their badge picture from <{}>",
+            MeSupport.logger.info("User <{}> updated their profile banner from <{}>",
                     user.getId(), ctx.ip());
         } catch (IOException e) {
-            MeSupport.logger.error("Could not store the badge picture of user <{}>",
-                    user.getId(), e);
-            ctx.status(500).json(Map.of("status", "Could not store the badge picture."));
+            MeSupport.logger.error("Could not store the banner of user <{}>", user.getId(), e);
+            ctx.status(500).json(Map.of("status", "Could not store the banner."));
         } finally {
             if (temporary != null) {
                 try {
@@ -211,7 +212,8 @@ public final class BadgeIconHandler implements Handler {
                 int width = reader.getWidth(0);
                 int height = reader.getHeight(0);
 
-                if (width < 16 || height < 16 || width > MAX_SIDE || height > MAX_SIDE
+                if (width < MIN_WIDTH || height < MIN_HEIGHT
+                        || width > MAX_SIDE || height > MAX_SIDE
                         || (long) width * height > MAX_PIXELS) {
                     return null;
                 }
@@ -224,18 +226,18 @@ public final class BadgeIconHandler implements Handler {
     }
 
     /**
-     * Crops the picture to the shape a badge is drawn in, then scales it down.
+     * Crops the picture to the strip a cover is drawn in, then scales it down.
      *
-     * <p>A badge is not a round avatar: it is a wide plate holding a picture and a
-     * name, so uploads are centre-cropped to 2:1 rather than to a square. The file
-     * then has the same proportions as the slot on the profile, so nothing is
-     * letterboxed or squashed there, whatever shape the player started from.</p>
+     * <p>The slot at the top of a profile is a wide 4:1 band. Storing the file in
+     * that shape lets the page show it without letterboxing or squashing it,
+     * whatever the player uploaded, and keeps one account from pushing the rest of
+     * the page down with a very tall image.</p>
      */
     private static BufferedImage normalise(BufferedImage source) {
         int width = source.getWidth();
         int height = source.getHeight();
 
-        // The largest centred 2:1 rectangle that fits inside the upload.
+        // The largest centred 4:1 rectangle that fits inside the upload.
         int cropWidth = Math.min(width, height * ASPECT_WIDTH / ASPECT_HEIGHT);
         int cropHeight = Math.max(1, cropWidth * ASPECT_HEIGHT / ASPECT_WIDTH);
         int x = (width - cropWidth) / 2;
@@ -264,7 +266,7 @@ public final class BadgeIconHandler implements Handler {
     }
 
     private static void tooLarge(Context ctx) {
-        ctx.status(413).json(Map.of("status", "The badge picture is too large (2 MB maximum)."));
+        ctx.status(413).json(Map.of("status", "The banner is too large (4 MB maximum)."));
     }
 
     private static void invalid(Context ctx) {

@@ -61,6 +61,10 @@ public class UserEntity {
     @Column(name = "custom_badge_icon", length = 64)
     private String customBadgeIcon;
 
+    /** Path of the uploaded profile cover, written by the banner upload route. */
+    @Column(name = "custom_banner", length = 64)
+    private String customBanner;
+
     @Column(name = "userpage_content", length = 2048)
     private String userpageContent;
 
