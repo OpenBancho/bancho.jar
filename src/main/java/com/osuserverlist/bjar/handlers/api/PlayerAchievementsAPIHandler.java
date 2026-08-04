@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.AchievementEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
@@ -78,7 +79,7 @@ public class PlayerAchievementsAPIHandler implements Handler {
         methods = HttpMethod.GET
     )
     public void handle(@NotNull Context ctx) {
-        UserEntity user = ApiMappers.resolveUser(ctx);
+        UserEntity user = ApiVisibility.resolveVisibleUser(ctx);
 
         if (user == null) {
             ctx.status(404).json(ApiPagination.error("Player not found."));

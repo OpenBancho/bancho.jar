@@ -85,7 +85,11 @@ public class LeaderboardAPIHandler implements Handler {
                 .fetch("user", "name, country")
                 .where()
                 .eq("id.mode", mode)
-                .gt("plays", 0);
+                .gt("plays", 0)
+                // A restriction takes the account off every public ranking. The
+                // path is written with the property name: Ebean resolves it
+                // through the join to the users table and writes priv itself.
+                .raw("user.privileges & 3 = 3");
 
         // Country codes are stored lower case. An empty value and "all"
         // both mean the global ranking, so a filter can be cleared

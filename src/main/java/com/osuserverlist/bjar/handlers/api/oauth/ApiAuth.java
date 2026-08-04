@@ -117,6 +117,48 @@ public final class ApiAuth {
         return token;
     }
 
+    /**
+     * Resolves the caller's token when the request carries one, and stays quiet when it does
+     * not.
+     *
+     * <p>For public endpoints that answer staff differently: nobody is turned away, so a
+     * visitor without a token simply gets the public answer, while a staff token also opens
+     * what players are not shown. Unlike {@link #require(Context)} this writes no status,
+     * because on those endpoints a missing token is not an error.
+     */
+    public static OAuthToken optional(Context ctx) {
+        String bearer = bearer(ctx);
+
+        if (bearer == null || bearer.isBlank()) {
+            return null;
+        }
+
+        OAuthToken token = TokenStore.resolveAccess(bearer);
+
+        if (token == null) {
+            return null;
+        }
+
+        UserEntity user = UserRepository.findById(token.getUserId());
+
+        if (user == null) {
+            return null;
+        }
+
+        // The same refresh require() does: the privileges come from the database rather than
+        // from the copy cached when the token was handed out.
+        token.setPrivileges(user.getPrivileges());
+        token.setUsername(user.getName());
+
+        return token;
+    }
+
+    /** Whether these privileges carry any of the four staff bits. */
+    public static boolean isStaff(int privileges) {
+        return Privileges.hasAny(privileges, Privileges.NOMINATOR, Privileges.MODERATOR,
+                Privileges.ADMINISTRATOR, Privileges.DEVELOPER);
+    }
+
     /** Whether an account has completed the in-game login that verifies it. */
     public static boolean isVerified(int privileges) {
         return Privileges.has(privileges, Privileges.VERIFIED);

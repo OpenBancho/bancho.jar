@@ -41,6 +41,7 @@ public class CountriesAPIHandler implements Handler {
             JOIN `users` u ON u.`id` = s.`id`
             WHERE s.`mode` = :mode
               AND s.`plays` > 0
+              AND (u.`priv` & 1) > 0
               AND u.`country` IS NOT NULL
               AND u.`country` <> ''
               AND u.`country` <> 'xx'

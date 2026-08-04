@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
 import com.osuserverlist.bjar.models.api.ApiPagination;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.models.database.ScoreEntity;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
@@ -73,6 +74,13 @@ public class ScoreInfoAPIHandler implements Handler {
         }
 
         if (score == null) {
+            ctx.status(404).json(ApiPagination.error("Score not found."));
+            return;
+        }
+
+        // A restricted player's plays go with them: the score page would name the
+        // account and link to a profile that answers 404, so it answers 404 too.
+        if (!ApiVisibility.canView(ctx, score.getUser())) {
             ctx.status(404).json(ApiPagination.error("Score not found."));
             return;
         }

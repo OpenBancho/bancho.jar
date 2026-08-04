@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.ScoreEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
@@ -92,7 +93,7 @@ public class PlayerFirstPlacesAPIHandler implements Handler {
         int limit = ApiPagination.limit(ctx);
         int mode = ApiPagination.intParam(ctx, "mode", 0);
 
-        UserEntity user = ApiMappers.resolveUser(ctx);
+        UserEntity user = ApiVisibility.resolveVisibleUser(ctx);
 
         if (user == null) {
             ctx.status(404).json(ApiPagination.error("Player not found."));

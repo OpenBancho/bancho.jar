@@ -10,8 +10,8 @@ import com.osuserverlist.bjar.models.osu.RankedStatus;
 import com.osuserverlist.bjar.modules.main.Commands.BanchoCommand;
 import com.osuserverlist.bjar.modules.main.Commands.BanchoCommandHandler;
 import com.osuserverlist.bjar.modules.main.Commands.CommandCategory;
+import com.osuserverlist.bjar.modules.admin.AdminActions;
 import com.osuserverlist.bjar.modules.main.Commands.Session;
-import com.osuserverlist.bjar.repos.BeatmapRepository;
 import com.osuserverlist.bjar.repos.MapRequestRepository;
 
 public class NominationCommands extends BanchoCommandHandler {
@@ -49,10 +49,11 @@ public class NominationCommands extends BanchoCommandHandler {
             return;
         }
 
+        // Routed through AdminActions so the PP of everyone who played the map is recomputed.
         if (isSet) {
-            BeatmapRepository.updateStatusBySetId(targetId, rankType.getValue(), true);
+            AdminActions.rankBeatmapSet(sender.getId(), targetId, rankType.getValue(), true);
         } else {
-            BeatmapRepository.updateStatusById(targetId, rankType.getValue(), true);
+            AdminActions.rankBeatmap(sender.getId(), targetId, rankType.getValue(), true);
         }
 
         MapRequestRepository.closeRequest(targetId, sender.getId());

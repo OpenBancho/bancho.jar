@@ -77,4 +77,17 @@ public final class UserRepository {
         return DB.find(UserEntity.class)
                 .findCount();
     }
+
+    /**
+     * How many accounts the public side is allowed to count.
+     *
+     * <p>A restriction takes the account out of the total too, so the number on
+     * the front page and the players who can actually be found agree.
+     */
+    public static long countPublic() {
+        return DB.find(UserEntity.class)
+                .where()
+                .raw("priv & 3 = 3")
+                .findCount();
+    }
 }

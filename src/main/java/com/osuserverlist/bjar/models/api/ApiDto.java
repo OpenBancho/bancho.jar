@@ -562,6 +562,44 @@ public final class ApiDto {
         private String name;
     }
 
+    // ----- password resets -----------------------------------------------
+
+    @Data
+    public static class PasswordResetLinkRequest {
+        private int user_id;
+        /** Optional. Clamped to 10 minutes - 7 days; defaults to 24 hours. */
+        private int expires_in_hours;
+    }
+
+    @Data
+    public static class PasswordResetLinkResponse {
+        private String status;
+        private int user_id;
+        /** The ticket itself. Anyone holding it can set the account's password. */
+        private String token;
+        /** Where to redeem it, so a frontend does not hard code the route. */
+        private String path;
+        /** Unix seconds. */
+        private long expires_at;
+        /** Seconds from now. */
+        private long expires_in;
+    }
+
+    @Data
+    public static class PasswordResetCheckResponse {
+        private String status;
+        private int user_id;
+        /** Shown to whoever opens the link, so a misdirected one is obvious. */
+        private String username;
+        private long expires_at;
+    }
+
+    @Data
+    public static class PasswordResetRequest {
+        private String token;
+        private String new_password;
+    }
+
     // ----- beatmap sets --------------------------------------------------
 
     /** A beatmap set as the search and the set endpoint return it. */

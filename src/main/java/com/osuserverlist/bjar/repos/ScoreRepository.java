@@ -1,6 +1,7 @@
 package com.osuserverlist.bjar.repos;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
@@ -43,12 +44,14 @@ public final class ScoreRepository {
         SqlRow row = DB.sqlQuery("""
                 SELECT COUNT(*) + 1 AS osu_rank
                 FROM (
-                    SELECT MAX(score) AS best_score
+                    SELECT MAX(scores.score) AS best_score
                     FROM scores
-                    WHERE map_md5 = :md5
-                      AND mode = :mode
-                      AND status = 2
-                    GROUP BY userid
+                    JOIN users ON users.id = scores.userid
+                    WHERE scores.map_md5 = :md5
+                      AND scores.mode = :mode
+                      AND scores.status = 2
+                      AND (users.priv & 1) > 0
+                    GROUP BY scores.userid
                 ) best_scores
                 WHERE best_score > :score
                 """)
@@ -68,13 +71,15 @@ public final class ScoreRepository {
         SqlRow row = DB.sqlQuery("""
                 SELECT COUNT(*) + 1 AS osu_rank
                 FROM (
-                    SELECT MAX(score) AS best_score
+                    SELECT MAX(scores.score) AS best_score
                     FROM scores
-                    WHERE map_md5 = :md5
-                      AND mode = :mode
-                      AND userid <> :userId
-                      AND status = 2
-                    GROUP BY userid
+                    JOIN users ON users.id = scores.userid
+                    WHERE scores.map_md5 = :md5
+                      AND scores.mode = :mode
+                      AND scores.userid <> :userId
+                      AND scores.status = 2
+                      AND (users.priv & 1) > 0
+                    GROUP BY scores.userid
                 ) best_scores
                 WHERE best_score > :score
                 """)
@@ -117,6 +122,8 @@ public final class ScoreRepository {
                 .eq("mapMd5", md5)
                 .eq("mode", mode)
                 .eq("status", 2)
+                // A restricted account is on no leaderboard the game asks for.
+                .raw("user.privileges & 3 = 3")
                 .orderBy("score desc, user.name")
                 .setMaxRows(100)
                 .findList();
@@ -133,6 +140,8 @@ public final class ScoreRepository {
                 .eq("mode", mode)
                 .eq("mods", mods)
                 .eq("status", 2)
+                // A restricted account is on no leaderboard the game asks for.
+                .raw("user.privileges & 3 = 3")
                 .orderBy("score desc, user.name")
                 .setMaxRows(100)
                 .findList();
@@ -148,6 +157,8 @@ public final class ScoreRepository {
                 .eq("mapMd5", md5)
                 .eq("mode", mode)
                 .eq("status", 2)
+                // A restricted account is on no leaderboard the game asks for.
+                .raw("user.privileges & 3 = 3")
                 .eq("user.country", country)
                 .orderBy("score desc, user.name")
                 .setMaxRows(100)
@@ -167,6 +178,12 @@ public final class ScoreRepository {
                     WHERE s.map_md5 = :md5
                       AND s.mode = :mode
                       AND s.status = 2
+                      AND EXISTS (
+                            SELECT 1
+                            FROM users u
+                            WHERE u.id = s.userid
+                              AND (u.priv & 1) > 0
+                      )
                       AND (
                             s.userid = :userId
                          OR s.userid IN (
@@ -237,6 +254,57 @@ public final class ScoreRepository {
 
         Double weightedPp = row.getDouble("weighted_pp");
         return weightedPp != null ? weightedPp : 0.0;
+    }
+
+    /** A single {@code (user, mode)} pair holding a score on some beatmap. */
+    public record AffectedPlayer(int userId, int mode) {
+    }
+
+    /**
+     * Every user and mode holding a score on the given beatmap.
+     *
+     * <p>Used after a beatmap's status changes: only these players can have a different
+     * weighted total afterwards, so there is no need to walk the whole server.</p>
+     */
+    public static List<AffectedPlayer> findAffectedPlayersByMd5(String md5) {
+        List<SqlRow> rows = DB.sqlQuery("""
+                SELECT DISTINCT s.userid AS userid, s.mode AS mode
+                FROM scores s
+                WHERE s.map_md5 = :md5
+                """)
+                .setParameter("md5", md5)
+                .findList();
+
+        return toAffectedPlayers(rows);
+    }
+
+    /** Every user and mode holding a score on any difficulty of the given beatmap set. */
+    public static List<AffectedPlayer> findAffectedPlayersBySetId(long setId) {
+        List<SqlRow> rows = DB.sqlQuery("""
+                SELECT DISTINCT s.userid AS userid, s.mode AS mode
+                FROM scores s
+                JOIN maps m ON s.map_md5 = m.md5
+                WHERE m.set_id = :setId
+                """)
+                .setParameter("setId", setId)
+                .findList();
+
+        return toAffectedPlayers(rows);
+    }
+
+    private static List<AffectedPlayer> toAffectedPlayers(List<SqlRow> rows) {
+        List<AffectedPlayer> affected = new ArrayList<>(rows.size());
+
+        for (SqlRow row : rows) {
+            Integer userId = row.getInteger("userid");
+            Integer mode = row.getInteger("mode");
+
+            if (userId != null && mode != null) {
+                affected.add(new AffectedPlayer(userId, mode));
+            }
+        }
+
+        return affected;
     }
 
     public static List<ScoreEntity> getRankedScoresByMode(int mode) {

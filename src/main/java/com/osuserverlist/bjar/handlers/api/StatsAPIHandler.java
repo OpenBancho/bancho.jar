@@ -1,9 +1,13 @@
 package com.osuserverlist.bjar.handlers.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.App;
 import com.osuserverlist.bjar.models.api.ApiDto.StatsResponse;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
@@ -40,8 +44,16 @@ public class StatsAPIHandler implements Handler {
     public void handle(@NotNull Context ctx) throws Exception {
 
         StatsResponse response = new StatsResponse();
-        response.setOnlinePlayers(App.server.playerManager.getOnlineCount());
-        response.setTotalPlayers(UserRepository.count());
+        // Counted the way the online list is built rather than from the raw session
+        // count, so a restricted player does not show up as a number nobody can find.
+        Set<Integer> listed = new HashSet<>();
+        int online = (int) App.server.playerManager.getAllSessions().stream()
+                .filter(ApiVisibility::isPublic)
+                .filter(player -> listed.add(player.getId()))
+                .count();
+
+        response.setOnlinePlayers(online);
+        response.setTotalPlayers(UserRepository.countPublic());
         response.setMaps(BeatmapRepository.count());
         response.setScores(ScoreRepository.count());
 

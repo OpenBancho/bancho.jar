@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import com.osuserverlist.bjar.App;
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiPagination;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
@@ -64,8 +65,9 @@ public class OnlineAPIHandler implements Handler {
 
         Set<Integer> seen = new HashSet<>();
         List<Map<String, Object>> all = App.server.playerManager.getAllSessions().stream()
-                .filter(player -> !player.isBot())
-                .filter(player -> !player.isTourneyClient())
+                // Bots, tournament client sessions and restricted accounts: a
+                // restricted player is online, but not to anybody else.
+                .filter(ApiVisibility::isPublic)
                 .filter(player -> seen.add(player.getId()))
                 .map(player -> {
                     Map<String, Object> row = new LinkedHashMap<>();

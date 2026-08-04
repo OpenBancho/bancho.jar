@@ -13,8 +13,10 @@ import com.osuserverlist.bjar.models.database.StatsEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.Privileges;
+import com.osuserverlist.bjar.modules.account.PasswordResetService;
 import com.osuserverlist.bjar.modules.datastore.Redis;
 import com.osuserverlist.bjar.modules.main.GeoLocation;
+import com.osuserverlist.bjar.modules.recalc.BeatmapRecalculator;
 import com.osuserverlist.bjar.packets.server.UtilServerPackets.NotificationPacket;
 import com.osuserverlist.bjar.repos.BeatmapRepository;
 import com.osuserverlist.bjar.repos.LogRepository;
@@ -272,6 +274,30 @@ public final class AdminActions {
         logger.info("Admin <{}> set beatmap <{}> to status <{}> (frozen: {})",
                 actorId, beatmapId, status, frozen);
 
+        // Scores set while the map was ranked keep their PP in stats and in the leaderboard
+        // sorted sets until someone recomputes them, so unranking has to do it here.
+        BeatmapRecalculator.recalcForMap(beatmapId);
+
+        return true;
+    }
+
+    /**
+     * Same as {@link #rankBeatmap(int, long, int, boolean)} for every difficulty of a set.
+     *
+     * @return {@code false} when no beatmap matched.
+     */
+    public static boolean rankBeatmapSet(int actorId, long setId, int status, boolean frozen) {
+        int affected = BeatmapRepository.updateStatusBySetId(setId, status, frozen);
+
+        if (affected == 0) {
+            return false;
+        }
+
+        logger.info("Admin <{}> set beatmap set <{}> to status <{}> on {} difficulties (frozen: {})",
+                actorId, setId, status, affected, frozen);
+
+        BeatmapRecalculator.recalcForSet(setId);
+
         return true;
     }
 
@@ -420,6 +446,45 @@ public final class AdminActions {
         record(actorId, userId, "note", message);
 
         return true;
+    }
+
+    // ------------------------------------------------------------------
+    // password resets
+    // ------------------------------------------------------------------
+
+    /**
+     * Hands out a one-shot password reset link for an account.
+     *
+     * <p>Nothing about the account changes here. The password is still chosen by whoever
+     * redeems the ticket, which is the point: staff help a player back in without ever holding
+     * their password, and the account itself keeps working until the reset is actually done.
+     *
+     * <p>The issue is logged against the account rather than only into the application log,
+     * because a link that opens somebody's account is exactly the kind of favour that has to be
+     * attributable afterwards.
+     *
+     * @return the issued ticket, or {@code null} when the user does not exist or Redis is down.
+     */
+    public static PasswordResetService.Issued issuePasswordReset(int actorId, int userId,
+            long ttlSeconds) {
+
+        if (!UserRepository.exists(userId)) {
+            return null;
+        }
+
+        PasswordResetService.Issued issued = PasswordResetService.issue(userId, actorId, ttlSeconds);
+
+        if (issued == null) {
+            return null;
+        }
+
+        logger.info("Admin <{}> issued a password reset link for user <{}>, valid until <{}>",
+                actorId, userId, issued.getExpiresAt());
+        record(actorId, userId, "password-reset",
+                "Issued a password reset link, valid for " + (issued.getTtlSeconds() / 3600)
+                        + " hour(s).");
+
+        return issued;
     }
 
     // ------------------------------------------------------------------

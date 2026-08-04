@@ -101,7 +101,10 @@ public class MapScoresAPIHandler implements Handler {
                 .where()
                 .eq("mapMd5", md5)
                 .eq("mode", mode)
-                .eq("status", 2);
+                .eq("status", 2)
+                // A restricted player is off the map's leaderboard as well, so
+                // the ranking here matches the one the game is served.
+                .raw("user.privileges & 3 = 3");
 
         String mods = ctx.queryParam("mods");
         if (mods != null && !mods.isBlank()) {

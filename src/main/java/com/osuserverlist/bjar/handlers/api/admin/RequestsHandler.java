@@ -314,7 +314,7 @@ public final class RequestsHandler {
 
                 // Frozen, so the next beatmap sync does not quietly undo the decision.
                 boolean applied = wholeSet
-                        ? BeatmapRepository.updateStatusBySetId(beatmap.getSetId(), status, true) > 0
+                        ? AdminActions.rankBeatmapSet(actorId, beatmap.getSetId(), status, true)
                         : AdminActions.rankBeatmap(actorId, mapId, status, true);
 
                 if (!applied) {

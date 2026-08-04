@@ -112,6 +112,11 @@ public final class AccessHandler implements Handler {
 
         if (developer) {
             sections.add("server");
+
+            // Handing out a link that opens somebody else's account is the most dangerous
+            // favour the panel can do, so it sits with the smallest group rather than with
+            // the administrators who do the day to day account work.
+            actions.add("password-reset");
         }
 
         Map<String, Object> response = ApiAuth.success();

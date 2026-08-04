@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
 import com.osuserverlist.bjar.models.database.BssMapsetEntity;
@@ -86,7 +87,7 @@ public class PlayerBeatmapsetsAPIHandler implements Handler {
         int offset = ApiPagination.offset(ctx);
         int limit = ApiPagination.limit(ctx);
 
-        UserEntity user = ApiMappers.resolveUser(ctx);
+        UserEntity user = ApiVisibility.resolveVisibleUser(ctx);
         if (user == null) {
             ctx.status(404).json(ApiPagination.error("Player not found."));
             return;

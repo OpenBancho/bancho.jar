@@ -7,6 +7,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.App;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.modules.main.Application;
 import com.osuserverlist.bjar.modules.main.Application.BuildInfo;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
@@ -35,7 +36,8 @@ public class PlayerPageHandler implements Handler {
 
         Set<Integer> listed = new HashSet<>();
         App.server.playerManager.getAllSessions().stream()
-                .filter(player -> !player.isTourneyClient())
+                // Restricted accounts are not listed here either.
+                .filter(ApiVisibility::isPublic)
                 .filter(player -> listed.add(player.getId()))
                 .forEach(player -> {
                     playerHtml.append(player.getUsername()).append(" (").append(player.getId()).append(")").append("<br>");

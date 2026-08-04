@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.models.api.ApiProfile;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.StatsEntity;
@@ -62,7 +63,7 @@ public class PlayerDetailsAPIHandler implements Handler {
             scope = "all";
         }
 
-        UserEntity user = ApiMappers.resolveUser(ctx);
+        UserEntity user = ApiVisibility.resolveVisibleUser(ctx);
         if (user == null) {
             ctx.status(404).json(ApiPagination.error("Player not found."));
             return;

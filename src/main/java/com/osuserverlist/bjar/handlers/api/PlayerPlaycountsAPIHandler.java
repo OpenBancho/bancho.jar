@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
+import com.osuserverlist.bjar.models.api.ApiVisibility;
 import com.osuserverlist.bjar.models.api.ApiPagination;
 import com.osuserverlist.bjar.models.database.UserEntity;
 import com.osuserverlist.bjar.modules.main.WebEngine;
@@ -86,7 +87,7 @@ public class PlayerPlaycountsAPIHandler implements Handler {
 
         months = Math.min(months, MAX_MONTHS);
 
-        UserEntity user = ApiMappers.resolveUser(ctx);
+        UserEntity user = ApiVisibility.resolveVisibleUser(ctx);
 
         if (user == null) {
             ctx.status(404).json(ApiPagination.error("Player not found."));
