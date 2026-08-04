@@ -84,6 +84,7 @@ public class App {
             Files.createDirectories(Path.of("data/replays"));
             Files.createDirectories(Path.of("data/ss"));
             Files.createDirectories(Path.of("data/assets/avatars"));
+            Files.createDirectories(Path.of("data/assets/badges"));
             Files.createDirectories(Path.of("data/assets/medals/client"));
 
             // Beatmap Submission System storage
@@ -125,6 +126,7 @@ public class App {
                     dotenv.get("BSS_ID_OFFSET", String.valueOf(BeatmapSubmissionService.DEFAULT_ID_OFFSET))));
             config.setBssMaxPendingSets(Integer.parseInt(dotenv.get("BSS_MAX_PENDING_SETS", "10")));
             config.setBssMaxUploadSizeMb(Integer.parseInt(dotenv.get("BSS_MAX_UPLOAD_SIZE_MB", "100")));
+            config.setDonorOnlyDirect(Boolean.parseBoolean(dotenv.get("DONOR_ONLY_DIRECT", "false")));
         });
 
         Runnable shutdownHook = () -> {

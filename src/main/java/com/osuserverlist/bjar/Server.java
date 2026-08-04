@@ -180,5 +180,8 @@ public class Server {
         private int bssIdOffset;
         private int bssMaxPendingSets;
         private int bssMaxUploadSizeMb;
+
+        /** When true, osu!direct (search and downloads) is a supporter perk. */
+        private boolean donorOnlyDirect;
     }
 }

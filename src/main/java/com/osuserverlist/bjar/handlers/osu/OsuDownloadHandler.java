@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import com.osuserverlist.bjar.App;
 import com.osuserverlist.bjar.models.database.BssMapsetEntity;
+import com.osuserverlist.bjar.models.essentials.Player;
+import com.osuserverlist.bjar.modules.account.DonorService;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
@@ -34,6 +36,21 @@ public class OsuDownloadHandler implements Handler {
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
         String mapSetId = ctx.pathParam("id");
+
+        // Downloads coming from osu!direct carry the player's credentials, so
+        // the supporter-only setting can be honoured here too. Requests without
+        // credentials (a browser, the website) are left alone.
+        String username = ctx.queryParam("u");
+        String passwordHash = ctx.queryParam("h");
+
+        if (username != null && passwordHash != null) {
+            Player player = App.server.playerManager.getByApiIdent(username + "|" + passwordHash);
+
+            if (player != null && !DonorService.canUseDirect(player)) {
+                ctx.status(403).result("osu!direct is available to supporters only.");
+                return;
+            }
+        }
 
         boolean noVideo = mapSetId.endsWith("n");
         if (noVideo) {

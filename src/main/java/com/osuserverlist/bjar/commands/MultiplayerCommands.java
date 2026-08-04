@@ -19,6 +19,7 @@ import com.osuserverlist.bjar.modules.main.Commands.BanchoCommand;
 import com.osuserverlist.bjar.modules.main.Commands.BanchoCommandHandler;
 import com.osuserverlist.bjar.modules.main.Commands.CommandCategory;
 import com.osuserverlist.bjar.modules.main.Commands.Session;
+import com.osuserverlist.bjar.packets.client.MultiplayerPackets;
 import com.osuserverlist.bjar.packets.server.MultiplayerServerPackets.MatchTransferHostPacket;
 import com.osuserverlist.bjar.packets.server.UtilServerPackets.GetAttentionPacket;
 
@@ -150,6 +151,39 @@ public class MultiplayerCommands extends BanchoCommandHandler {
         session.server.matchManager.joinMatch(match, targetPlayer);
         targetPlayer.sendPacket(new GetAttentionPacket());
         session.sendAnswer("Player " + targetPlayerName + " has been forced to join the match.");
+    }
+
+    @MultiplayerCommand(
+            name = "invite",
+            description = "Invites a player to the match."
+    )
+    public void invite(Player sender, Session session, String[] args, Match match) {
+        if (args.length == 0) {
+            session.sendAnswer("Usage: !mp invite <player>");
+            return;
+        }
+
+        String targetPlayerName = String.join(" ", args).trim();
+        Player targetPlayer = session.server.playerManager
+                .getByFilter(p -> p.getUsername().equalsIgnoreCase(targetPlayerName));
+
+        if (targetPlayer == null || targetPlayer.isBot()) {
+            session.sendAnswer("Player not found.");
+            return;
+        }
+
+        if (targetPlayer.getId() == sender.getId()) {
+            session.sendAnswer("You are already in this match.");
+            return;
+        }
+
+        if (findPlayerInMatch(match, targetPlayer.getUsername()) != null) {
+            session.sendAnswer(targetPlayer.getUsername() + " is already in this match.");
+            return;
+        }
+
+        MultiplayerPackets.sendInvite(sender, targetPlayer, match);
+        session.sendAnswer("Invited " + targetPlayer.getUsername() + " to the match.");
     }
 
     private Player findPlayerInMatch(Match match, String username) {

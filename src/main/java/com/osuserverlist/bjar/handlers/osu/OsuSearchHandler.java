@@ -18,6 +18,7 @@ import com.osuserverlist.bjar.models.database.BssMapsetEntity;
 import com.osuserverlist.bjar.models.direct.DirectBeatmapSet;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.RankedStatus;
+import com.osuserverlist.bjar.modules.account.DonorService;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
@@ -56,6 +57,14 @@ public class OsuSearchHandler implements Handler {
 
         if (player == null) {
             ctx.status(401).result("Invalid credentials.");
+            return;
+        }
+
+        // osu!direct can be made a supporter perk. The client shows the first
+        // line of the answer as the error inside the direct panel.
+        if (!DonorService.canUseDirect(player)) {
+            ctx.contentType("text/plain");
+            ctx.result("-1\nosu!direct is available to supporters only.");
             return;
         }
 

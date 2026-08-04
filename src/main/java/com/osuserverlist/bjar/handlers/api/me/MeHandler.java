@@ -10,6 +10,7 @@ import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
 import com.osuserverlist.bjar.models.database.StatsEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
+import com.osuserverlist.bjar.modules.account.DonorService;
 import com.osuserverlist.bjar.modules.api.OAuthToken;
 import com.osuserverlist.bjar.modules.main.WebEngine;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
@@ -83,6 +84,10 @@ public final class MeHandler implements Handler {
         info.put("email", user.getEmail());
         info.put("silence_end", user.getSilenceEnd());
         info.put("donor_end", user.getDonorEnd());
+        // donor_end is only one of the two ways to be a supporter: the permanent
+        // SUPPORTER / PREMIUM bits count as well. The answer is computed here so
+        // the website does not have to re-implement the rule and get it wrong.
+        info.put("supporter", DonorService.isDonor(user));
         info.put("clan_priv", user.getClanPriv());
         info.put("userpage_content", user.getUserpageContent());
         info.put("custom_badge_name", user.getCustomBadgeName());

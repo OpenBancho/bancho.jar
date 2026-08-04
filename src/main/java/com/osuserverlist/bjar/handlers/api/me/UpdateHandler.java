@@ -9,7 +9,8 @@ import com.osuserverlist.bjar.handlers.api.oauth.ApiAuth;
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiMappers;
 import com.osuserverlist.bjar.models.database.UserEntity;
-import com.osuserverlist.bjar.models.osu.Privileges;
+import com.osuserverlist.bjar.models.api.ApiPagination;
+import com.osuserverlist.bjar.modules.account.DonorService;
 import com.osuserverlist.bjar.modules.admin.AdminActions;
 import com.osuserverlist.bjar.modules.api.OAuthToken;
 import com.osuserverlist.bjar.modules.main.WebEngine;
@@ -148,8 +149,12 @@ public final class UpdateHandler implements Handler {
 
         boolean touchesBadge = body.has("custom_badge_name") || body.has("custom_badge_icon");
 
-        // A custom badge is a supporter perk in game; the API keeps the same rule.
-        if (touchesBadge && !ApiAuth.requireAny(ctx, token, Privileges.SUPPORTER, Privileges.PREMIUM)) {
+        // A custom badge is a supporter perk. Supporter is either the timed
+        // donor_end handed out by the admin panel or the permanent privilege
+        // bits, so the shared check decides instead of the bits alone.
+        if (touchesBadge && !DonorService.isDonor(user)) {
+            ctx.status(403).json(ApiPagination.error(
+                    "A custom badge is a supporter perk."));
             return;
         }
 
@@ -185,6 +190,31 @@ public final class UpdateHandler implements Handler {
             changed = true;
         }
 
+        // A badge without a picture would render as a bare word on the profile,
+        // so the two fields are only accepted together. Clearing both is fine.
+        if (touchesBadge) {
+            String badgeName = trimToNull(user.getCustomBadgeName());
+            String badgeIcon = trimToNull(user.getCustomBadgeIcon());
+
+            if (badgeIcon != null && !isImageUrl(badgeIcon)) {
+                ApiAuth.badRequest(ctx, "The badge icon must be an http(s) link to an image.");
+                return;
+            }
+
+            if (badgeName != null && badgeIcon == null) {
+                ApiAuth.badRequest(ctx, "A badge needs an icon image.");
+                return;
+            }
+
+            if (badgeIcon != null && badgeName == null) {
+                ApiAuth.badRequest(ctx, "A badge needs a name.");
+                return;
+            }
+
+            user.setCustomBadgeName(badgeName);
+            user.setCustomBadgeIcon(badgeIcon);
+        }
+
         if (!changed) {
             ApiAuth.badRequest(ctx, "Nothing to update.");
             return;
@@ -198,5 +228,36 @@ public final class UpdateHandler implements Handler {
         response.put("info", ApiMappers.userInfo(user));
 
         ctx.json(response);
+    }
+
+    /** Blank badge fields are stored as {@code null} so "no badge" has one shape. */
+    private static String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    /**
+     * The badge icon is rendered as an {@code <img>} on the profile, so only two
+     * shapes are accepted: a path this server itself handed out for an uploaded
+     * picture, and a plain http(s) link. Anything else (a {@code javascript:} or
+     * {@code data:} value in particular) is refused rather than escaped later.
+     */
+    private static boolean isImageUrl(String value) {
+        String lower = value.toLowerCase(java.util.Locale.ROOT);
+
+        // What BadgeIconHandler stores after an upload. It is the normal case, and
+        // rejecting it used to make saving an uploaded badge impossible.
+        boolean uploaded = lower.startsWith("/api/v1/badge/");
+
+        if (!uploaded && !lower.startsWith("http://") && !lower.startsWith("https://")) {
+            return false;
+        }
+
+        return !lower.contains("\"") && !lower.contains("<") && !lower.contains(" ");
     }
 }

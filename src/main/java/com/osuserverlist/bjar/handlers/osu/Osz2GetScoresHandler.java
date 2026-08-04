@@ -35,12 +35,24 @@ public class Osz2GetScoresHandler implements Handler {
 
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
-        int mode = ctx.queryParamAsClass("m", Integer.class).required().get();
-        int mods = ctx.queryParamAsClass("mods", Integer.class).required().get();
-        int leaderboardType = ctx.queryParamAsClass("v", Integer.class).required().get();
+        respond(ctx);
+    }
 
-        String username = ctx.queryParam("us");
-        String passwordHash = ctx.queryParam("ha");
+    /**
+     * Builds the leaderboard answer.
+     *
+     * <p>Shared with {@code /web/osu-getscores.php}: pre-osz2 clients ask the
+     * same question with fewer parameters and different credential names, so
+     * every value is read leniently and falls back to what those clients assume
+     * (no mods, local leaderboard).</p>
+     */
+    public static void respond(@NotNull Context ctx) throws Exception {
+        int mode = ctx.queryParamAsClass("m", Integer.class).getOrDefault(0);
+        int mods = ctx.queryParamAsClass("mods", Integer.class).getOrDefault(0);
+        int leaderboardType = ctx.queryParamAsClass("v", Integer.class).getOrDefault(1);
+
+        String username = ctx.queryParam("us") != null ? ctx.queryParam("us") : ctx.queryParam("u");
+        String passwordHash = ctx.queryParam("ha") != null ? ctx.queryParam("ha") : ctx.queryParam("h");
 
         Server server = App.server;
 

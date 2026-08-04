@@ -599,6 +599,102 @@ public class MultiplayerPackets {
         return true;
     }
 
+    /**
+     * The skip button during a multiplayer intro.
+     *
+     * <p>The intro is only actually skipped once everyone who is playing has
+     * pressed it, so each request is broadcast as a marker first and the real
+     * skip goes out when the last one arrives. Players who are not playing (open,
+     * locked or unready slots) are not waited for, otherwise a single spectator
+     * would hold the whole lobby in the intro.</p>
+     */
+    @ClientPacket(ClientPackets.MATCH_SKIP_REQUEST)
+    public boolean matchSkipRequest(BanchoPacket packet, BanchoPacketReader reader, Player player) throws IOException {
+        Match match = player.getMatch();
+
+        if (match == null) {
+            logger.warn("Player {} sent MATCH_SKIP_REQUEST but is not in a match", player);
+            return false;
+        }
+
+        MatchSlot slot = match.getSlot(player);
+
+        if (slot == null) {
+            logger.warn("Player {} sent MATCH_SKIP_REQUEST but is not in a match slot", player);
+            return false;
+        }
+
+        if (slot.isSkipped()) {
+            return true;
+        }
+
+        slot.setSkipped(true);
+
+        int slotIndex = match.getSlotIndex(player);
+
+        match.sendPacket(new MatchPlayerSkippedPacket(slotIndex));
+
+        boolean everyoneSkipped = true;
+
+        for (MatchSlot s : match.getSlots()) {
+            if (s.getStatus() == SlotStatus.PLAYING.byteValue && !s.isSkipped()) {
+                everyoneSkipped = false;
+                break;
+            }
+        }
+
+        if (everyoneSkipped) {
+            match.sendPacket(new MatchSkipPacket());
+        }
+
+        return true;
+    }
+
+    /**
+     * The "invite" button in the client, and what {@code !mp invite} ends up
+     * sending too. The invitation is a chat line carrying an {@code osump://}
+     * link, which is what the client turns into a clickable join button.
+     */
+    @ClientPacket(ClientPackets.MATCH_INVITE)
+    public boolean matchInvite(BanchoPacket packet, BanchoPacketReader reader, Player player) throws IOException {
+        int userId = reader.readInt();
+
+        Match match = player.getMatch();
+
+        if (match == null) {
+            logger.warn("Player {} sent MATCH_INVITE but is not in a match", player);
+            return true;
+        }
+
+        Player target = App.server.playerManager.getById(userId);
+
+        if (target == null || target.isBot()) {
+            player.sendPacket(new SendMessagePacket(
+                    App.server.botPlayer.getUsername(),
+                    "That player is not online right now.",
+                    player.getUsername(),
+                    App.server.botPlayer.getId()));
+            return true;
+        }
+
+        sendInvite(player, target, match);
+        return true;
+    }
+
+    /** Builds and delivers the clickable invitation line. */
+    public static void sendInvite(Player sender, Player target, Match match) {
+        String password = match.getRoomPassword() == null ? "" : match.getRoomPassword();
+
+        String message = String.format("Come join my multiplayer match: [osump://%d/%s %s]",
+                match.getMatchId(), password, match.getRoomName());
+
+        target.sendPacket(new MatchInvitePacket(
+                sender.getUsername(),
+                message,
+                target.getUsername(),
+                sender.getId()));
+    }
+
     public void sendMatchAllPlayersLoadedPacket(Match match) {
         match.getPlayers().forEach(p -> {
             MatchSlot slot = match.getSlot(p);

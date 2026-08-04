@@ -52,6 +52,10 @@ public final class ApiMappers {
         map.put("clan_id", user.getClanId());
         map.put("preferred_mode", user.getPreferredMode());
         map.put("play_style", user.getPlayStyle());
+        // The custom badge is shown on the public profile, so it belongs in the
+        // public mapper rather than only in the owner's own view.
+        map.put("custom_badge_name", user.getCustomBadgeName());
+        map.put("custom_badge_icon", user.getCustomBadgeIcon());
         map.put("creation_time", user.getCreationTime());
         map.put("latest_activity", user.getLatestActivity());
         return map;

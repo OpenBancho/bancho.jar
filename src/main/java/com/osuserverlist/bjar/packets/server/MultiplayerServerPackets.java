@@ -59,6 +59,30 @@ public class MultiplayerServerPackets {
     public static class MatchAllPlayersLoadedPacket implements ServerPacket {
     }
 
+    /**
+     * The invitation the client shows as a clickable chat line. It travels as a
+     * normal chat message with an {@code osump://} link, which is what makes the
+     * "join" button in the client work.
+     */
+    @Value
+    public static class MatchInvitePacket implements ServerPacket {
+        private String senderName;
+        private String message;
+        private String target;
+        private int senderId;
+    }
+
+    /** Everyone skipped: the client jumps to the first note. */
+    @Value
+    public static class MatchSkipPacket implements ServerPacket {
+    }
+
+    /** One player pressed skip; the others get the little skip marker. */
+    @Value
+    public static class MatchPlayerSkippedPacket implements ServerPacket {
+        private int slotId;
+    }
+
     @Value
     public static class MatchCompletePacket implements ServerPacket {
     }
@@ -156,6 +180,38 @@ public class MultiplayerServerPackets {
         @Override
         public void write(MatchAllPlayersLoadedPacket packet, BanchoPacketWriter writer, Player player) {
             writer.startPacket(ServerPackets.MATCH_ALL_PLAYERS_LOADED);
+            writer.endPacket();
+        }
+    }
+
+    @PacketHandler(MatchInvitePacket.class)
+    public static final class MatchInviteHandler implements ServerPacketHandler<MatchInvitePacket> {
+        @Override
+        public void write(MatchInvitePacket packet, BanchoPacketWriter writer, Player player) {
+            writer.startPacket(ServerPackets.MATCH_INVITE);
+            writer.writeString(packet.getSenderName());
+            writer.writeString(packet.getMessage());
+            writer.writeString(packet.getTarget());
+            writer.writeInt(packet.getSenderId());
+            writer.endPacket();
+        }
+    }
+
+    @PacketHandler(MatchSkipPacket.class)
+    public static final class MatchSkipHandler implements ServerPacketHandler<MatchSkipPacket> {
+        @Override
+        public void write(MatchSkipPacket packet, BanchoPacketWriter writer, Player player) {
+            writer.startPacket(ServerPackets.MATCH_SKIP);
+            writer.endPacket();
+        }
+    }
+
+    @PacketHandler(MatchPlayerSkippedPacket.class)
+    public static final class MatchPlayerSkippedHandler implements ServerPacketHandler<MatchPlayerSkippedPacket> {
+        @Override
+        public void write(MatchPlayerSkippedPacket packet, BanchoPacketWriter writer, Player player) {
+            writer.startPacket(ServerPackets.MATCH_PLAYER_SKIPPED);
+            writer.writeInt(packet.getSlotId());
             writer.endPacket();
         }
     }

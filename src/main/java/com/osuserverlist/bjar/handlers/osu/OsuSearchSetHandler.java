@@ -9,6 +9,7 @@ import com.osuserverlist.bjar.App;
 import com.osuserverlist.bjar.Server;
 import com.osuserverlist.bjar.models.database.BeatmapEntity;
 import com.osuserverlist.bjar.models.essentials.Player;
+import com.osuserverlist.bjar.modules.account.DonorService;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
@@ -38,6 +39,11 @@ public class OsuSearchSetHandler implements Handler {
 
         if (player == null) {
             ctx.status(401).result("Invalid credentials.");
+            return;
+        }
+
+        if (!DonorService.canUseDirect(player)) {
+            ctx.result("");
             return;
         }
 
