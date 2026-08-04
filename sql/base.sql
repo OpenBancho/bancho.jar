@@ -249,6 +249,20 @@ CREATE TABLE
 		`created_by` int NOT NULL
 	) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
+-- One row per player, mode and day: where the account stood in the world that
+-- day. Nothing else keeps a rank around - a position is counted from `stats`
+-- when a profile is opened - so the graph on a profile reads from here.
+CREATE TABLE
+	IF NOT EXISTS `rank_history` (
+		`userid` int NOT NULL,
+		`mode` tinyint NOT NULL,
+		`date` date NOT NULL,
+		`rank` int NOT NULL,
+		`pp` int NOT NULL DEFAULT '0',
+		PRIMARY KEY (`userid`, `mode`, `date`),
+		KEY `rank_history_lookup` (`userid`, `mode`, `date`)
+	) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
 CREATE TABLE
 	`tourney_pool_maps` (
 		`map_id` int NOT NULL,

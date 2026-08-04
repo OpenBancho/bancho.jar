@@ -29,6 +29,7 @@ import com.osuserverlist.bjar.server.MatchManager;
 import com.osuserverlist.bjar.server.PlayerManager;
 import com.osuserverlist.bjar.server.scheudler.BotPresenceTask;
 import com.osuserverlist.bjar.server.scheudler.PlayerCleanupTask;
+import com.osuserverlist.bjar.server.scheudler.RankSnapshotTask;
 import com.osuserverlist.bjar.server.scheudler.SendChannelInfoTask;
 
 import io.javalin.openapi.plugin.OpenApiPlugin;
@@ -63,6 +64,11 @@ public class Server {
 
         executor.scheduleAtFixedRate(new PlayerCleanupTask(), 0, 60, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(new SendChannelInfoTask(), 0, 8, TimeUnit.SECONDS);
+
+        // One row per player and day feeds the rank graph on a profile. Six
+        // hours apart is often enough that a restart cannot lose a whole day,
+        // and a repeat within the same day just overwrites its own row.
+        executor.scheduleAtFixedRate(new RankSnapshotTask(), 30, 6 * 60 * 60, TimeUnit.SECONDS);
 
         Player botPlayer = playerManager.getBotPlayer(1);
 
