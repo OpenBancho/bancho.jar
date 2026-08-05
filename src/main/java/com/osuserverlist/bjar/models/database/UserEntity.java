@@ -28,6 +28,14 @@ public class UserEntity {
     @Column(name = "pw_bcrypt", length = 60, nullable = false)
     private String passwordHash;
 
+    /**
+     * Base32 secret of the account's authenticator app, or {@code null} when two factor
+     * authentication is off. Its presence is what "2FA is on" means; there is no second flag to
+     * disagree with.
+     */
+    @Column(name = "totp_secret", length = 64)
+    private String totpSecret;
+
     @Column(name = "country", length = 2, nullable = false)
     private String country = "xx";
 

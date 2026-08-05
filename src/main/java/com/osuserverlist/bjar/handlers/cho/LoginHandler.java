@@ -16,6 +16,8 @@ import com.osuserverlist.bjar.models.essentials.ModeStats;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.LoginResponse;
 import com.osuserverlist.bjar.models.osu.Privileges;
+import com.osuserverlist.bjar.modules.account.TotpService;
+import com.osuserverlist.bjar.modules.account.TwoFactorService;
 import com.osuserverlist.bjar.modules.main.Application.BuildInfo;
 import com.osuserverlist.bjar.modules.main.GeoLocation;
 import com.osuserverlist.bjar.modules.main.GeoLocation.Country;
@@ -65,6 +67,15 @@ public class LoginHandler {
 
     private static final int LOGIN_FAILED = -1;
 
+    /**
+     * Sends the client into its own account verification flow: it opens
+     * {@code osu.<domain>/client-verifications/create?ch=<client hash>} in the player's browser
+     * and returns to the login screen. That address is built into the client, so this is how a
+     * player with two factor authentication is asked for a code without the client having to
+     * know anything about us.
+     */
+    private static final int VERIFICATION_REQUIRED = -8;
+
     public void handle(Context ctx) {
         LoginResponse loginResponse = LoginResponse.parse(ctx);
 
@@ -81,6 +92,14 @@ public class LoginHandler {
         UserEntity userEntity = authenticate(loginResponse);
         if (userEntity == null) {
             sendLoginFailure(ctx, LOGIN_FAILED);
+            return;
+        }
+
+        // The password was right, which is the first factor. An account with an authenticator
+        // still has to answer a code from an unfamiliar machine, and the only way to ask for one
+        // is to send the client to the website - the login is refused for now and the player
+        // comes back to it after verifying.
+        if (requiresTwoFactor(ctx, userEntity, loginResponse)) {
             return;
         }
 
@@ -355,6 +374,49 @@ public class LoginHandler {
             player.sendPacket(new SendMessagePacket(server.botPlayer.getUsername(), botMessage,
                     player.getUsername(), server.botPlayer.getId()));
         }
+    }
+
+    /**
+     * Whether this login has to be answered with the verification reply instead of a session.
+     *
+     * <p>True only when the account has two factor authentication switched on and this machine
+     * has not answered a code for it before. Everyone else - which is everyone, until they turn
+     * it on themselves in the settings - is unaffected.
+     *
+     * <p>When it is true the login is filed under the machine's fingerprint before the reply
+     * goes out, so the page the client is about to open knows whose code it is waiting for. The
+     * response is written here rather than by the caller because the caller has nothing left to
+     * do either way.
+     */
+    private boolean requiresTwoFactor(Context ctx, UserEntity userEntity, LoginResponse loginResponse) {
+        if (!TotpService.enabled(userEntity.getTotpSecret())) {
+            return false;
+        }
+
+        String fingerprint = TwoFactorService.fingerprint(loginResponse.getClientHash());
+
+        // No usable client hash means no way to recognise the machine, and no way for the
+        // verification page to find this login either. Refusing every such login would lock the
+        // account out of a client that sends an odd hash, so the password is taken as enough.
+        if (fingerprint == null) {
+            logger.warn("Login of <{}> carries no usable client hash; skipping the 2FA check",
+                    userEntity.getName());
+
+            return false;
+        }
+
+        if (TwoFactorService.isTrusted(userEntity.getId(), fingerprint)) {
+            return false;
+        }
+
+        TwoFactorService.openChallenge(loginResponse.getClientHash(), userEntity.getId());
+
+        logger.info("Login of <{}> from <{}> needs two factor verification",
+                userEntity.getName(), loginResponse.getIp());
+
+        sendLoginFailure(ctx, VERIFICATION_REQUIRED);
+
+        return true;
     }
 
     private void sendLoginFailure(Context ctx, int loginState) {
