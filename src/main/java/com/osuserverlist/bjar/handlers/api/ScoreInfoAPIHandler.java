@@ -1,5 +1,7 @@
 package com.osuserverlist.bjar.handlers.api;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -85,9 +87,36 @@ public class ScoreInfoAPIHandler implements Handler {
             return;
         }
 
+        Map<String, Object> details = ApiMappers.score(score, true);
+
+        // Who set it. A score page with no name on it is not a score page, and the
+        // row that links here already knows the name - the page should not have to
+        // ask a second endpoint for it.
+        details.put("player", ApiMappers.userRef(score.getUser()));
+
+        // Where the play sits on the map's board. Only a submitted best has a place
+        // on it; an overwritten or failed score has none, and gets none here rather
+        // than a number that would read as a rank it never held.
+        details.put("rank", score.getStatus() != null && score.getStatus() == 2
+                ? ScoreRepository.getRank(score.getMapMd5(), score.getMode(), score.getScore())
+                : null);
+
+        // Whether the replay was kept, so the page can offer the download only when
+        // there is a file behind the button.
+        details.put("replay_available", hasReplay(score.getId()));
+
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", "success");
-        body.put("score", ApiMappers.score(score, true));
+        body.put("score", details);
         ctx.json(body);
+    }
+
+    /** Whether a replay file was stored for this score. */
+    static boolean hasReplay(Long scoreId) {
+        if (scoreId == null) {
+            return false;
+        }
+
+        return Files.isRegularFile(Paths.get("data", "replays", scoreId + ".osr"));
     }
 }
