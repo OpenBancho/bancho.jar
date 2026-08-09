@@ -2,6 +2,7 @@ package com.osuserverlist.bjar.packets.client;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -28,6 +29,16 @@ public class ChatPackets {
     @ClientPacket(ClientPackets.CHANNEL_JOIN)
     public boolean joinChannel(BanchoPacket packet, BanchoPacketReader reader, Player player) throws IOException {
         String channelName = reader.readString();
+
+        // Internal channel keys must never be joined directly: that would bypass
+        // the match password check in JOIN_MATCH and the spectating check in
+        // SpectatePackets. Clients only ever see these channels through their
+        // "#multiplayer" / "#spectator" aliases, and membership is granted by
+        // MatchManager.joinMatch / the spectate handler once those checks pass.
+        if (isInternalChannelName(channelName)) {
+            logger.warn("Player {} tried to join internal channel {} directly", player.toString(), channelName);
+            return true;
+        }
 
         Channel channel = App.server.channelManager.get(channelName);
         if (channel == null) {
@@ -88,6 +99,21 @@ public class ChatPackets {
         }
 
         if(!player.canChat()) {
+            return true;
+        }
+
+        // A player may only speak in channels they actually joined. Without this
+        // any channel could be written to by name, including match channels of
+        // password-protected rooms and staff-only channels.
+        if (!channel.getPlayers().contains(player)) {
+            logger.warn("Player {} tried to write to channel {} without being a member", player.toString(),
+                    channel.getName());
+            return true;
+        }
+
+        if (channel.getWritePriv() > player.getServerPrivileges()) {
+            logger.warn("Player {} tried to write to channel {} without sufficient privileges", player.toString(),
+                    channel.getName());
             return true;
         }
 
@@ -164,12 +190,31 @@ public class ChatPackets {
             return server.channelManager.get("#multi_" + player.getMatch().getMatchId());
         }
 
+        // Match and spectator channels are only addressable through the aliases
+        // handled above, which verify the match / spectating state first.
+        if (isInternalChannelName(target)) {
+            logger.warn("Player {} tried to address internal channel {} directly", player.toString(), target);
+            return null;
+        }
+
         Channel channel = server.channelManager.get(target);
         if (channel == null) {
             logger.warn("Channel not found for target: {}", target);
         }
 
         return channel;
+    }
+
+    /**
+     * Internal channel keys that clients must not address directly.
+     */
+    private static boolean isInternalChannelName(String channelName) {
+        if (channelName == null) {
+            return false;
+        }
+
+        String lower = channelName.toLowerCase(Locale.ROOT);
+        return lower.startsWith("#multi_") || lower.startsWith("#mp_") || lower.startsWith("#spec_");
     }
 
 }

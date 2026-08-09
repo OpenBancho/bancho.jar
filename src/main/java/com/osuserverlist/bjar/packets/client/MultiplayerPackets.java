@@ -321,6 +321,19 @@ public class MultiplayerPackets {
             return false;
         }
 
+        // Only the current host may hand host over, otherwise any member of the
+        // match could take control of the room.
+        if (match.getHostId() != player.getId()) {
+            logger.warn("Player {} sent MATCH_TRANSFER_HOST but is not the host of match {}", player,
+                    match.getMatchId());
+            return true;
+        }
+
+        if (slotId < 0 || slotId >= Match.MAX_SLOTS) {
+            logger.warn("Player {} sent MATCH_TRANSFER_HOST with an out of range slot {}", player, slotId);
+            return true;
+        }
+
         MatchSlot slot = match.getSlots()[slotId];
         if (slot == null || slot.getPlayerId() == 0) {
             logger.warn("Player {} sent MATCH_TRANSFER_HOST but slot {} is empty", player, slotId);
@@ -375,8 +388,10 @@ public class MultiplayerPackets {
 
             // Kick player from match
             Player p = server.playerManager.getById(playerId);
-            p.sendPacket(new MatchUpdatePacket(match));
-            p.setMatch(null);
+            if (p != null) {
+                p.sendPacket(new MatchUpdatePacket(match));
+                p.setMatch(null);
+            }
         }
 
         slot.setStatus((byte) SlotStatus.LOCKED.value);
