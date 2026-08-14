@@ -1,6 +1,9 @@
 > [!WARNING]  
 > At the moment the server is not recommended to use in production
 
+>Not affiliated with osu! or ppy Pty Ltd.
+>All rights belong to their respective owners. 
+
 ## Roadmap
 
 - [x] Authentication
