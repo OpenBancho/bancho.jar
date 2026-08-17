@@ -18,6 +18,7 @@ import com.osuserverlist.bjar.modules.api.OAuthToken;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
+import com.osuserverlist.bjar.repos.GroupRepository;
 import com.osuserverlist.bjar.repos.LogRepository;
 import com.osuserverlist.bjar.repos.StatsRepository;
 import com.osuserverlist.bjar.repos.UserRepository;
@@ -121,6 +122,9 @@ public final class PlayerHandler implements Handler {
         response.put("logs", AdminPresenter.logs(history));
         response.put("log_count", LogRepository.countByTarget(userId));
         response.put("stats", stats(userId));
+        // The account's current groups: the badges on this page and the
+        // membership dialog both start from the truth.
+        response.put("groups", GroupRepository.publicGroupsOf(userId));
 
         ctx.json(response);
     }

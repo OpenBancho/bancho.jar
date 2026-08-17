@@ -15,6 +15,7 @@ import com.osuserverlist.bjar.models.database.UserEntity;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
+import com.osuserverlist.bjar.repos.GroupRepository;
 import com.osuserverlist.bjar.repos.StatsRepository;
 
 import io.javalin.http.Context;
@@ -77,6 +78,9 @@ public class PlayerDetailsAPIHandler implements Handler {
             // Not a stored column: counted from the friend relationships
             // pointing at this account.
             info.put("followers", ApiProfile.followers(user.getId()));
+
+            // The groups the account belongs to: the badges the page shows.
+            info.put("groups", GroupRepository.publicGroupsOf(user.getId()));
 
             player.put("info", info);
         }

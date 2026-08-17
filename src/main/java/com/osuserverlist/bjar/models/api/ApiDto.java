@@ -487,6 +487,43 @@ public final class ApiDto {
         private String current_password_md5;
     }
 
+    /** POST /api/v1/me/friends body: which player, and what to do about them. */
+    @Data
+    public static class FriendActionRequest {
+        /** The other player's id. */
+        private int id;
+        /** add, accept, decline, cancel or remove. */
+        private String action;
+    }
+
+    /**
+     * POST /api/v1/admin/groups body. Which change a call means is in
+     * {@code action}: create, update or delete. The id is only read for the
+     * latter two.
+     */
+    @Data
+    public static class GroupSaveRequest {
+        private String action;
+        private Integer id;
+        private String name;
+        private String icon;
+        /** Six hex digits, no leading hash. */
+        private String colour;
+        private String description;
+    }
+
+    /**
+     * POST /api/v1/admin/groups/members body. add and remove take a single
+     * {@code group_id}; set takes the full {@code group_ids} list.
+     */
+    @Data
+    public static class GroupMemberRequest {
+        private String action;
+        private int user_id;
+        private Integer group_id;
+        private List<Integer> group_ids;
+    }
+
     // ----- moderation and administration ---------------------------------
 
     @Data

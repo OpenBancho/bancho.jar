@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.osuserverlist.bjar.App;
+import com.osuserverlist.bjar.models.database.GroupEntity;
 import com.osuserverlist.bjar.models.database.ScoreEntity;
 import com.osuserverlist.bjar.models.database.StatsEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
@@ -19,6 +20,7 @@ import com.osuserverlist.bjar.modules.main.GeoLocation;
 import com.osuserverlist.bjar.modules.recalc.BeatmapRecalculator;
 import com.osuserverlist.bjar.packets.server.UtilServerPackets.NotificationPacket;
 import com.osuserverlist.bjar.repos.BeatmapRepository;
+import com.osuserverlist.bjar.repos.GroupRepository;
 import com.osuserverlist.bjar.repos.LogRepository;
 import com.osuserverlist.bjar.repos.StatsRepository;
 import com.osuserverlist.bjar.repos.UserRepository;
@@ -498,6 +500,87 @@ public final class AdminActions {
      * this runs, and a database hiccup here must not turn a completed restriction into a 500
      * that invites the moderator to do it a second time.</p>
      */
+    // ------------------------------------------------------------------
+    // groups
+    // ------------------------------------------------------------------
+
+    /** Creates a group. Returns {@code null} when the name is already taken. */
+    public static GroupEntity createGroup(int actorId, String name, String icon, String colour,
+            String description) {
+        if (GroupRepository.nameTaken(name, 0)) {
+            return null;
+        }
+
+        GroupEntity group = new GroupEntity();
+        group.setName(name);
+        group.setIcon(icon);
+        group.setColour(colour);
+        group.setDescription(description);
+        GroupRepository.save(group);
+
+        logger.info("Admin <{}> created group <{}> (<{}>)", actorId, group.getId(), name);
+
+        return group;
+    }
+
+    /** Edits a group. {@code false} when it does not exist or the new name is taken. */
+    public static boolean updateGroup(int actorId, int groupId, String name, String icon,
+            String colour, String description) {
+        GroupEntity group = GroupRepository.findById(groupId);
+
+        if (group == null || GroupRepository.nameTaken(name, groupId)) {
+            return false;
+        }
+
+        group.setName(name);
+        group.setIcon(icon);
+        group.setColour(colour);
+        group.setDescription(description);
+        GroupRepository.save(group);
+
+        logger.info("Admin <{}> edited group <{}> (<{}>)", actorId, groupId, name);
+
+        return true;
+    }
+
+    /** Deletes a group and every membership in it. */
+    public static boolean deleteGroup(int actorId, int groupId) {
+        GroupEntity group = GroupRepository.findById(groupId);
+
+        if (group == null) {
+            return false;
+        }
+
+        GroupRepository.delete(group);
+        logger.info("Admin <{}> deleted group <{}> (<{}>)", actorId, groupId, group.getName());
+
+        return true;
+    }
+
+    /** Adds an account to a group. Already being a member is not an error. */
+    public static void addToGroup(int actorId, int userId, GroupEntity group) {
+        if (GroupRepository.isMember(userId, group.getId())) {
+            return;
+        }
+
+        GroupRepository.addMember(userId, group.getId());
+
+        logger.info("Admin <{}> added user <{}> to group <{}>", actorId, userId, group.getId());
+        record(actorId, userId, "group", "Added to group \"" + group.getName() + "\".");
+    }
+
+    /** Removes an account from a group. Not being a member is not an error. */
+    public static void removeFromGroup(int actorId, int userId, GroupEntity group) {
+        if (!GroupRepository.isMember(userId, group.getId())) {
+            return;
+        }
+
+        GroupRepository.removeMember(userId, group.getId());
+
+        logger.info("Admin <{}> removed user <{}> from group <{}>", actorId, userId, group.getId());
+        record(actorId, userId, "group", "Removed from group \"" + group.getName() + "\".");
+    }
+
     private static void record(int actorId, int userId, String action, String message) {
         try {
             LogRepository.write(actorId, userId, action, message);

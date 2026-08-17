@@ -19,6 +19,18 @@ public final class RelationshipRepository {
                 .findList();
     }
 
+    /**
+     * Rows pointing at this account: everyone who added it as a friend. A row
+     * that has no opposite row yet is a pending incoming request.
+     */
+    public static List<RelationshipEntity> getIncoming(UserEntity user) {
+        return DB.find(RelationshipEntity.class)
+                .where()
+                .eq("target", user)
+                .eq("type", RelationshipType.friend)
+                .findList();
+    }
+
     public static List<RelationshipEntity> getBlocks(UserEntity user) {
         return DB.find(RelationshipEntity.class)
                 .where()

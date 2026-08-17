@@ -9,11 +9,13 @@ import org.jetbrains.annotations.NotNull;
 
 import com.osuserverlist.bjar.models.api.ApiDto;
 import com.osuserverlist.bjar.models.api.ApiPagination;
+import com.osuserverlist.bjar.models.database.GroupEntity;
 import com.osuserverlist.bjar.models.database.StatsEntity;
 import com.osuserverlist.bjar.models.database.UserEntity;
 import com.osuserverlist.bjar.modules.main.WebEngine.Host;
 import com.osuserverlist.bjar.modules.main.WebEngine.HttpMethod;
 import com.osuserverlist.bjar.modules.main.WebEngine.Path;
+import com.osuserverlist.bjar.repos.GroupRepository;
 
 import io.ebean.DB;
 import io.ebean.ExpressionList;
@@ -122,6 +124,29 @@ public class LeaderboardAPIHandler implements Handler {
             row.put("plays", stats.getPlays());
             row.put("max_combo", stats.getMaxCombo());
             results.add(row);
+        }
+
+        // Group badges travel with each row, so the ranking can show them
+        // without a follow-up request per player. One query covers the page.
+        List<Integer> ids = new ArrayList<>();
+        for (Map<String, Object> row : results) {
+            if (row.get("id") instanceof Integer id) {
+                ids.add(id);
+            }
+        }
+
+        Map<Integer, List<GroupEntity>> groupsByUser = GroupRepository.groupsOfUsers(ids);
+
+        for (Map<String, Object> row : results) {
+            List<Map<String, Object>> badges = new ArrayList<>();
+
+            if (row.get("id") instanceof Integer id && groupsByUser.containsKey(id)) {
+                for (GroupEntity group : groupsByUser.get(id)) {
+                    badges.add(GroupRepository.publicGroup(group));
+                }
+            }
+
+            row.put("groups", badges);
         }
 
         ctx.json(ApiPagination.envelope(offset, limit, paged.getTotalCount(), results));

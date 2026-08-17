@@ -104,6 +104,10 @@ public final class AccessHandler implements Handler {
         }
 
         if (admin) {
+            // Groups: creating them, editing them, and deciding who carries them.
+            sections.add("groups");
+            actions.add("groups");
+
             actions.add("wipe");
             actions.add("supporter");
             actions.add("privileges");
