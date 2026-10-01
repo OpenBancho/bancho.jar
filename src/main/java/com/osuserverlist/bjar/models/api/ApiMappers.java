@@ -139,6 +139,7 @@ public final class ApiMappers {
         map.put("acc", score.getAcc());
         map.put("max_combo", score.getMaxCombo());
         map.put("mods", score.getMods());
+        map.put("lazer_score", score.getLazerScore() != null ? score.getLazerScore() : 0L);
         map.put("n300", score.getN300());
         map.put("n100", score.getN100());
         map.put("n50", score.getN50());
