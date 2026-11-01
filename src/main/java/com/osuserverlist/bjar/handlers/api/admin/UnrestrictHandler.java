@@ -95,6 +95,15 @@ public final class UnrestrictHandler implements Handler {
             return;
         }
 
-        ctx.json(ApiAuth.success());
+        // The lift always goes through, but a staff member who lifts a restriction the anti-cheat still enforces is told that
+        // scores will not be signed, and what to do about it.
+        java.util.Map<String, Object> answer = ApiAuth.success();
+        com.osuserverlist.bjar.models.database.UserEntity target = com.osuserverlist.bjar.repos.UserRepository.findById(userId);
+        String notice = com.osuserverlist.bjar.modules.anticheat.AnticheatClient.liftNotice(userId, target == null ? "this player" : target.getName());
+        if (notice != null) {
+            answer.put("notice", notice);
+        }
+
+        ctx.json(answer);
     }
 }

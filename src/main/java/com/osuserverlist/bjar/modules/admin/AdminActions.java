@@ -581,6 +581,11 @@ public final class AdminActions {
         record(actorId, userId, "group", "Removed from group \"" + group.getName() + "\".");
     }
 
+    /** Writes an anti-cheat related staff action (vouch, vouch_revoke) into the staff log. */
+    public static void logAnticheat(int actorId, int userId, String action, String message) {
+        record(actorId, userId, action, message);
+    }
+
     private static void record(int actorId, int userId, String action, String message) {
         try {
             LogRepository.write(actorId, userId, action, message);

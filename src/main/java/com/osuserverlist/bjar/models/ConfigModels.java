@@ -99,6 +99,20 @@ public class ConfigModels {
         }
     }
 
+    /** The OpenWatcher anti-cheat server this game server vouches through. Both empty = no anti-cheat. */
+    @Data
+    public static class AnticheatConfiguration {
+        private String url = "";
+        private String serverKey = "";
+
+        public static AnticheatConfiguration load() {
+            return Configuration.load(
+                    ".config/anticheat.toml",
+                    AnticheatConfiguration.class,
+                    AnticheatConfiguration::new);
+        }
+    }
+
     @Data
     public static class PresenceConfiguration {
         private List<PresenceInfo> presenceInfos = List.of(new PresenceInfo(ActionStatus.EDITING, "bancho.jars source code"), new PresenceInfo(ActionStatus.WATCHING, "some gameplay"), new PresenceInfo(ActionStatus.TESTING, "some beatmaps"), new PresenceInfo(ActionStatus.SUBMITTING, "some beatmaps"));

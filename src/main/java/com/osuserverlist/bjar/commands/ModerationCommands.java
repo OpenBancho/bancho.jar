@@ -117,8 +117,10 @@ public class ModerationCommands extends BanchoCommandHandler {
 
     private void applyRestriction(Session session, Player sender, String username, String reason, boolean restrict) {
         Player targetPlayer = session.server.playerManager.getByUsername(username);
+        int targetId;
 
         if (targetPlayer != null) {
+            targetId = targetPlayer.getId();
             setOnlinePlayerRestricted(session.server, targetPlayer, restrict);
             logger.info("Player {} has been {} by {} for reason: {}", targetPlayer, restrict ? "restricted" : "unrestricted", sender, reason);
         } else {
@@ -129,6 +131,7 @@ public class ModerationCommands extends BanchoCommandHandler {
                 return;
             }
 
+            targetId = user.getId();
             setOfflineUserRestricted(user, restrict);
             logger.info("Player {} has been {} by {} for reason: {}", user, restrict ? "restricted" : "unrestricted", sender, reason);
         }
@@ -136,6 +139,14 @@ public class ModerationCommands extends BanchoCommandHandler {
         session.sendAnswer(restrict
                 ? "Successfully restricted " + username + " for: " + reason
                 : "Successfully unrestricted " + username + " for: " + reason);
+
+        // Lifting a restriction the anti-cheat still enforces does not bring the player's scores back: say so.
+        if (!restrict) {
+            String notice = com.osuserverlist.bjar.modules.anticheat.AnticheatClient.liftNotice(targetId, username);
+            if (notice != null) {
+                session.sendAnswer(notice);
+            }
+        }
     }
 
     private void setOnlinePlayerRestricted(Server server, Player targetPlayer, boolean restrict) {

@@ -96,6 +96,11 @@ public final class AccessHandler implements Handler {
         }
 
         if (moderator) {
+            // Vouching for a player needs the anti-cheat to be configured on this server.
+            if (com.osuserverlist.bjar.modules.anticheat.AnticheatClient.isConfigured()) {
+                actions.add("vouch");
+            }
+
             actions.add("restrict");
             actions.add("silence");
             actions.add("note");
