@@ -167,6 +167,64 @@ public final class UpdateHandler implements Handler {
             changed = true;
         }
 
+        // Same rule for the page background: uploading is a separate route, and
+        // this one can only remove it.
+        if (body.has("custom_background")) {
+            if (!DonorService.isDonor(user)) {
+                ctx.status(403).json(ApiPagination.error(
+                        "A profile background is a supporter perk."));
+                return;
+            }
+
+            if (!body.get("custom_background").isNull()) {
+                ApiAuth.badRequest(ctx, "A background is set by uploading one, so "
+                        + "custom_background may only be null.");
+                return;
+            }
+
+            user.setCustomBackground(null);
+            BackgroundHandler.deleteFile(user.getId());
+            changed = true;
+        }
+
+        // The profile colours are a supporter perk: the primary one is the accent,
+        // the secondary one tints the panels. Only a strict #rrggbb value (or null
+        // to go back to the default) is stored, because the site pastes them into
+        // a style attribute.
+        for (String key : new String[] {"profile_color", "profile_color_secondary"}) {
+            if (!body.has(key)) {
+                continue;
+            }
+
+            if (!DonorService.isDonor(user)) {
+                ctx.status(403).json(ApiPagination.error(
+                        "A profile colour scheme is a supporter perk."));
+                return;
+            }
+
+            JsonNode node = body.get(key);
+            String color = null;
+
+            if (!node.isNull()) {
+                color = node.isTextual() ? node.asText().trim() : "";
+
+                if (!color.matches("#[0-9a-fA-F]{6}")) {
+                    ApiAuth.badRequest(ctx, key + " must be null or a #rrggbb colour.");
+                    return;
+                }
+
+                color = color.toLowerCase(java.util.Locale.ROOT);
+            }
+
+            if (key.equals("profile_color")) {
+                user.setProfileColor(color);
+            } else {
+                user.setProfileColorSecondary(color);
+            }
+
+            changed = true;
+        }
+
         boolean touchesBadge = body.has("custom_badge_name") || body.has("custom_badge_icon");
 
         // A custom badge is a supporter perk. Supporter is either the timed

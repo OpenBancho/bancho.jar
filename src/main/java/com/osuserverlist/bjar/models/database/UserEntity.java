@@ -73,6 +73,18 @@ public class UserEntity {
     @Column(name = "custom_banner", length = 64)
     private String customBanner;
 
+    /** Path of the uploaded profile page background, written by the background upload route. */
+    @Column(name = "custom_background", length = 64)
+    private String customBackground;
+
+    /** Accent colour of the profile page as #rrggbb, chosen in the site settings. */
+    @Column(name = "profile_color", length = 7)
+    private String profileColor;
+
+    /** Colour of the panels and surfaces of the profile page as #rrggbb. */
+    @Column(name = "profile_color_secondary", length = 7)
+    private String profileColorSecondary;
+
     @Column(name = "userpage_content", length = 2048)
     private String userpageContent;
 

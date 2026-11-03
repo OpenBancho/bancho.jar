@@ -93,6 +93,9 @@ public final class MeHandler implements Handler {
         info.put("custom_badge_name", user.getCustomBadgeName());
         info.put("custom_badge_icon", user.getCustomBadgeIcon());
         info.put("custom_banner", user.getCustomBanner());
+        info.put("custom_background", user.getCustomBackground());
+        info.put("profile_color", user.getProfileColor());
+        info.put("profile_color_secondary", user.getProfileColorSecondary());
 
         Map<String, Object> statsByMode = new LinkedHashMap<>();
         for (StatsEntity stats : StatsRepository.findAllByUser(user.getId())) {

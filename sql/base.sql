@@ -297,6 +297,9 @@ CREATE TABLE
 			utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
 			`custom_badge_icon` varchar(64) DEFAULT NULL,
 			`custom_banner` varchar(64) DEFAULT NULL,
+			`custom_background` varchar(64) DEFAULT NULL,
+			`profile_color` varchar(7) DEFAULT NULL,
+			`profile_color_secondary` varchar(7) DEFAULT NULL,
 			`userpage_content` varchar(2048) CHARACTER
 		SET
 			utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
