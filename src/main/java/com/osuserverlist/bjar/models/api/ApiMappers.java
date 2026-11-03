@@ -59,6 +59,8 @@ public final class ApiMappers {
         // The cover picture is part of how a profile looks to visitors, so it is
         // public as well; the site draws it at the top of the page.
         map.put("custom_banner", user.getCustomBanner());
+        // The userpage is the text a player wrote about themselves in the site settings; visitors read it on the profile.
+        map.put("userpage_content", user.getUserpageContent());
         map.put("creation_time", user.getCreationTime());
         map.put("latest_activity", user.getLatestActivity());
         return map;
