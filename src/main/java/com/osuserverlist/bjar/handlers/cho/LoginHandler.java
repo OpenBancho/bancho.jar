@@ -16,6 +16,7 @@ import com.osuserverlist.bjar.models.essentials.ModeStats;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.LoginResponse;
 import com.osuserverlist.bjar.models.osu.Privileges;
+import com.osuserverlist.bjar.modules.account.ClientExclusivity;
 import com.osuserverlist.bjar.modules.account.TotpService;
 import com.osuserverlist.bjar.modules.account.TwoFactorService;
 import com.osuserverlist.bjar.modules.main.Application.BuildInfo;
@@ -92,6 +93,18 @@ public class LoginHandler {
         UserEntity userEntity = authenticate(loginResponse);
         if (userEntity == null) {
             sendLoginFailure(ctx, LOGIN_FAILED);
+            return;
+        }
+
+        // One account, one game client: whoever got in first (stable or lazer) keeps the account until
+        // they leave. Tournament clients open several sessions by design and are exempt.
+        var requestedVersion = OsuVersionParser.parse(loginResponse.getBuildName());
+        boolean requestedIsTourney = requestedVersion != null
+                && requestedVersion.getStream() == OsuVersionParser.OsuStream.TOURNAMENT;
+
+        if (!requestedIsTourney && ClientExclusivity.isLazerOnline(userEntity.getId())) {
+            logger.info("Login of <{}> refused: the account is online in lazer", userEntity.getName());
+            sendLoginRefusal(ctx, "This account is already online in osu!lazer. Close it and try again.");
             return;
         }
 
@@ -417,6 +430,22 @@ public class LoginHandler {
         sendLoginFailure(ctx, VERIFICATION_REQUIRED);
 
         return true;
+    }
+
+    /** Refuses the login with the generic failure reply plus a notification that tells the player why. */
+    private void sendLoginRefusal(Context ctx, String message) {
+        BanchoPacketWriter writer = new BanchoPacketWriter();
+        writer.startPacket(ServerPacketEngine.ServerPackets.LOGIN_REPLY);
+        writer.writeInt(LOGIN_FAILED);
+        writer.endPacket();
+        writer.startPacket(ServerPacketEngine.ServerPackets.NOTIFICATION);
+        writer.writeString(message);
+        writer.endPacket();
+
+        ctx.status(HttpStatus.OK)
+                .header("cho-token", "")
+                .contentType("application/octet-stream")
+                .result(writer.getPackets());
     }
 
     private void sendLoginFailure(Context ctx, int loginState) {

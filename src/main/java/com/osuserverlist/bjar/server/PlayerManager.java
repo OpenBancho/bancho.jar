@@ -15,6 +15,7 @@ import com.osuserverlist.bjar.models.essentials.Match;
 import com.osuserverlist.bjar.models.essentials.ModeStats;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.Privileges;
+import com.osuserverlist.bjar.modules.account.ClientExclusivity;
 import com.osuserverlist.bjar.modules.irc.IrcPlayer;
 import com.osuserverlist.bjar.packets.server.LoginServerPackets.SilenceInfoPacket;
 import com.osuserverlist.bjar.packets.server.UserServerPackets.UserQuitPacket;
@@ -29,6 +30,15 @@ public class PlayerManager {
         onlineSessions.put(player.getOsuToken(), player);
         apiIdentMap.put(player.getApiIdent(), player);
         onlinePlayers.add(player);
+
+        if (tracksExclusivity(player)) {
+            ClientExclusivity.markBanchoOnline(player.getId());
+        }
+    }
+
+    /** Bots, tournament clients and IRC connections do not count as the account being in the game client. */
+    private static boolean tracksExclusivity(Player player) {
+        return !player.isBot() && !player.isTourneyClient() && !(player instanceof IrcPlayer);
     }
 
     public Player get(String osuToken) {
@@ -92,6 +102,15 @@ public class PlayerManager {
         // Announce the quit only when the account has no remaining sessions.
         boolean stillOnline = onlineSessions.values().stream()
                 .anyMatch(p -> p.getId() == player.getId());
+
+        if (tracksExclusivity(player)) {
+            boolean gameClientLeft = onlineSessions.values().stream()
+                    .noneMatch(p -> p.getId() == player.getId() && tracksExclusivity(p));
+
+            if (gameClientLeft) {
+                ClientExclusivity.markBanchoOffline(player.getId());
+            }
+        }
 
         if (!stillOnline) {
             for (Player p : onlineSessions.values()) {

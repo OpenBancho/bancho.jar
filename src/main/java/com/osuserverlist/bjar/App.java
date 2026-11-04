@@ -66,6 +66,8 @@ public class App {
 
         redis.connect();
 
+        com.osuserverlist.bjar.modules.account.ClientExclusivity.clearBancho();
+
         if (args.length > 0 && args[0].equalsIgnoreCase("--recalc")) {
             boolean force = false;
             if (args.length > 1 && args[1].equalsIgnoreCase("--force")) {
