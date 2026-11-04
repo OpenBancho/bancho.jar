@@ -25,6 +25,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         netcat-openbsd \
         libicu78 \
+        fontconfig fonts-dejavu-core libfreetype6 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p logs .config data

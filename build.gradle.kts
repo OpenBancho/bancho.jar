@@ -49,6 +49,9 @@ val jacksonVersion = "2.21.2"
 val mvelVersion = "2.5.2.Final"
 val caffeineVersion = "3.2.4"
 val maxmindVersion = "5.1.0"
+val ffmpegVersion = "7.1.1-1.5.12"
+val javacppVersion = "1.5.12"
+val xzVersion = "1.10"
 
 dependencies {
     implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
@@ -98,6 +101,16 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
 
     implementation("com.maxmind.geoip2:geoip2:$maxmindVersion")
+
+    // Replay video rendering: the ffmpeg binaries (with libx264) ship inside the jar, so the server needs no
+    // system ffmpeg. Only the 64-bit Windows and Linux builds are pulled in to keep the jar small.
+    implementation("org.bytedeco:javacpp:$javacppVersion")
+    implementation("org.bytedeco:ffmpeg:$ffmpegVersion")
+    runtimeOnly("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64-gpl")
+    runtimeOnly("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64-gpl")
+
+    // LZMA, for the compressed frame stream inside .osr replay files
+    implementation("org.tukaani:xz:$xzVersion")
 }
 
 publishing {
