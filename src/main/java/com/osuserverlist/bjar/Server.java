@@ -157,6 +157,9 @@ public class Server {
             // Register annotated handlers for the web server
             WebEngine.registerDefaultHandlers(config);
 
+            // Live spectating from the website: server-sent events, one connection per viewer (see WebSpectate)
+            config.routes.sse("/api/v1/spectate/stream", com.osuserverlist.bjar.modules.spectate.WebSpectate::stream);
+
             if (enviromentConfig.getLevel() == ProductionLevel.DEVELOPMENT) {
                 config.bundledPlugins.enableRouteOverview("/routes");
                 config.bundledPlugins.enableDevLogging();

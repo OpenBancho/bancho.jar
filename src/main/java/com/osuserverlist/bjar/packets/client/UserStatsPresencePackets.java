@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.osuserverlist.bjar.App;
+import com.osuserverlist.bjar.modules.spectate.WebSpectate;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.GameMode;
 import com.osuserverlist.bjar.models.osu.Mods;
@@ -107,6 +108,8 @@ public class UserStatsPresencePackets {
         for (Player onlinePlayer : App.server.playerManager.getAllSessions()) {
             onlinePlayer.sendPacket(new UserStatsPacket(player));
         }
+
+        WebSpectate.onAction(player);
 
         return true;
     }

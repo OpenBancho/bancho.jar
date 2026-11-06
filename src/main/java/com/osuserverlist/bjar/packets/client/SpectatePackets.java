@@ -8,6 +8,7 @@ import com.osuserverlist.bjar.models.essentials.Channel;
 import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.replay.ReplayFrameBundle;
 import com.osuserverlist.bjar.modules.packets.BanchoPacketReader;
+import com.osuserverlist.bjar.modules.spectate.WebSpectate;
 import com.osuserverlist.bjar.modules.packets.ClientPacketEngine.ClientPacket;
 import com.osuserverlist.bjar.modules.packets.ClientPacketEngine.ClientPackets;
 import com.osuserverlist.bjar.modules.packets.ServerPacketEngine.ServerPacket;
@@ -28,6 +29,8 @@ public class SpectatePackets {
         for (Player spectator : player.getSpectators()) {
             spectator.sendPacket(new SpectateFramesPacket(rawData));
         }
+
+        WebSpectate.onFrames(player, frames);
 
         return true;
     }

@@ -229,7 +229,7 @@ public final class BestReplayService {
     }
 
     // The .osu the score was set on: the stored file when its md5 matches, else the entry of the osz that does.
-    private static byte[] findOsu(BeatmapEntity map, Path osz) throws Exception {
+    public static byte[] findOsu(BeatmapEntity map, Path osz) throws Exception {
         Path stored = Paths.get("data", "maps", map.getId() + ".osu");
 
         if (Files.isRegularFile(stored)) {
@@ -268,7 +268,7 @@ public final class BestReplayService {
     }
 
     /** The beatmap set archive: stored by the server, cached from an earlier render, or downloaded once. Null if none. */
-    private static Path findOsz(long setId) {
+    public static Path findOsz(long setId) {
         Path stored = Paths.get("data", "osz", setId + ".osz");
 
         if (Files.isRegularFile(stored)) {

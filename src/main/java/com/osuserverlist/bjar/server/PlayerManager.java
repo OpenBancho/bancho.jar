@@ -17,6 +17,7 @@ import com.osuserverlist.bjar.models.essentials.Player;
 import com.osuserverlist.bjar.models.osu.Privileges;
 import com.osuserverlist.bjar.modules.account.ClientExclusivity;
 import com.osuserverlist.bjar.modules.irc.IrcPlayer;
+import com.osuserverlist.bjar.modules.spectate.WebSpectate;
 import com.osuserverlist.bjar.packets.server.LoginServerPackets.SilenceInfoPacket;
 import com.osuserverlist.bjar.packets.server.UserServerPackets.UserQuitPacket;
 import com.osuserverlist.bjar.repos.UserRepository;
@@ -33,6 +34,7 @@ public class PlayerManager {
 
         if (tracksExclusivity(player)) {
             ClientExclusivity.markBanchoOnline(player.getId());
+            WebSpectate.onLogin(player);
         }
     }
 
@@ -113,6 +115,8 @@ public class PlayerManager {
         }
 
         if (!stillOnline) {
+            WebSpectate.onDisconnect(player);
+
             for (Player p : onlineSessions.values()) {
                 p.sendPacket(new UserQuitPacket(player.getId()));
             }
