@@ -80,6 +80,6 @@ public class ScoreEntity {
     private String onlineChecksum;
 
     /** Lazer standardised score (null / 0 means the score was set from osu!stable). */
-    @Column(name = "lazer_score", nullable = true)
-    private Long lazerScore;
+    @Column(name = "lazer_score", nullable = false)
+    private Long lazerScore = 0L;
 }
