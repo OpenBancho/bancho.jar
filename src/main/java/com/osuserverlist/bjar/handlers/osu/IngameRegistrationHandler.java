@@ -33,6 +33,10 @@ import lombok.AllArgsConstructor;
 @HttpMethod("POST")
 public class IngameRegistrationHandler implements Handler {
 
+    /** The game form has no captcha, so accounts per address are capped: 5 per hour. */
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter REGISTER_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(5, 60 * 60_000L);
+
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
         String username = ctx.formParam("user[username]");
@@ -67,6 +71,14 @@ public class IngameRegistrationHandler implements Handler {
         }
 
         if (isFinalSubmission) {
+            String regKey = "ip:" + com.osuserverlist.bjar.modules.util.ClientIp.of(ctx);
+
+            if (REGISTER_LIMIT.isBlocked(regKey)) {
+                ctx.status(429).result("too_many_requests");
+                return;
+            }
+
+            REGISTER_LIMIT.record(regKey);
             RegistrationService.create(username, email, password, errors);
 
             if (!errors.isEmpty()) {
