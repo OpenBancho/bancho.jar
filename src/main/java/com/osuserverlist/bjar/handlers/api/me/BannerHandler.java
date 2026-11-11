@@ -174,7 +174,7 @@ public final class BannerHandler implements Handler {
             ctx.json(response);
 
             MeSupport.logger.info("User <{}> updated their profile banner from <{}>",
-                    user.getId(), ctx.ip());
+                    user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
         } catch (IOException e) {
             MeSupport.logger.error("Could not store the banner of user <{}>", user.getId(), e);
             ctx.status(500).json(Map.of("status", "Could not store the banner."));

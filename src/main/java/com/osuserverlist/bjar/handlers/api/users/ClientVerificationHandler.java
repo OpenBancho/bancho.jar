@@ -99,7 +99,7 @@ public final class ClientVerificationHandler implements Handler {
         String fingerprint = TwoFactorService.fingerprint(clientHash);
 
         if (TwoFactorService.tooManyFailures(fingerprint)) {
-            logger.warn("Too many wrong 2FA codes from <{}>", ctx.ip());
+            logger.warn("Too many wrong 2FA codes from <{}>", com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             ApiAuth.badRequest(ctx, "Too many wrong codes. Try to log in from the game again.");
             return;
         }
@@ -114,7 +114,7 @@ public final class ClientVerificationHandler implements Handler {
         if (!TotpService.verify(user.getTotpSecret(), code)) {
             TwoFactorService.countFailure(fingerprint);
 
-            logger.warn("Wrong 2FA code for user <{}> from <{}>", user.getId(), ctx.ip());
+            logger.warn("Wrong 2FA code for user <{}> from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             ApiAuth.badRequest(ctx, "That code does not match. Wait for the next one and try again.");
             return;
         }
@@ -122,7 +122,7 @@ public final class ClientVerificationHandler implements Handler {
         TwoFactorService.trust(user.getId(), fingerprint);
         TwoFactorService.closeChallenge(fingerprint);
 
-        logger.info("User <{}> verified a client from <{}>", user.getId(), ctx.ip());
+        logger.info("User <{}> verified a client from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         Map<String, Object> response = ApiAuth.success();
         response.put("username", user.getName());

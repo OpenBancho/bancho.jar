@@ -100,7 +100,7 @@ public final class RegisterHandler implements Handler {
             return;
         }
 
-        Captcha.Result captcha = Captcha.verify(params.get(Captcha.field()), ctx.ip());
+        Captcha.Result captcha = Captcha.verify(params.get(Captcha.field()), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         if (!captcha.isSuccess()) {
             ctx.status(400).json(Map.of(
@@ -124,7 +124,7 @@ public final class RegisterHandler implements Handler {
         }
 
         TokenStore.TokenPair pair = TokenStore.issue(user.getId(), user.getName(),
-                user.getPrivileges(), params.get("scope"), params.get("client_id"), ctx.ip());
+                user.getPrivileges(), params.get("scope"), params.get("client_id"), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         if (pair == null) {
             // The account is real, only the login could not be handed over. The
@@ -140,7 +140,7 @@ public final class RegisterHandler implements Handler {
         }
 
         logger.info("Registered <{}>({}) from <{}> through the API (scope: {})",
-                user.getName(), user.getId(), ctx.ip(), pair.getScope());
+                user.getName(), user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx), pair.getScope());
 
         ctx.header("Cache-Control", "no-store");
         ctx.header("Pragma", "no-cache");

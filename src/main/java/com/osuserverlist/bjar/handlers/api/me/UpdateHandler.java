@@ -300,7 +300,7 @@ public final class UpdateHandler implements Handler {
 
         UserRepository.save(user);
 
-        logger.info("User <{}> updated their profile from <{}>", user.getId(), ctx.ip());
+        logger.info("User <{}> updated their profile from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         Map<String, Object> response = ApiAuth.success();
         response.put("info", ApiMappers.userInfo(user));

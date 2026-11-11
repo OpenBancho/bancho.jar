@@ -168,7 +168,7 @@ public final class DeleteHandler implements Handler {
         UserRepository.delete(user);
 
         logger.warn("User <{}> deleted their own account from <{}> ({} score(s) removed)",
-                userId, ctx.ip(), scores.size());
+                userId, com.osuserverlist.bjar.modules.util.ClientIp.of(ctx), scores.size());
 
         ctx.json(ApiAuth.success());
     }

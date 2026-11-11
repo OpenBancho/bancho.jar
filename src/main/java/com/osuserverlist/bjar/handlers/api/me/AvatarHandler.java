@@ -122,7 +122,7 @@ public final class AvatarHandler implements Handler {
             ctx.header("Cache-Control", "no-store");
             ctx.json(Map.of("status", "success", "avatar", token.getUserId() + ".png"));
             MeSupport.logger.info("User <{}> updated their avatar from <{}>",
-                    token.getUserId(), ctx.ip());
+                    token.getUserId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
         } catch (IOException e) {
             MeSupport.logger.error("Could not store avatar for user <{}>", token.getUserId(), e);
             ctx.status(500).json(Map.of("status", "Could not store the avatar."));

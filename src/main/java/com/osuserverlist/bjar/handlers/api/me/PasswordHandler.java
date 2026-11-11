@@ -129,7 +129,7 @@ public final class PasswordHandler implements Handler {
             App.server.playerManager.disconnect(player);
         }
 
-        logger.info("User <{}> changed their password from <{}>", user.getId(), ctx.ip());
+        logger.info("User <{}> changed their password from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         Map<String, Object> response = ApiAuth.success();
         response.put("reauthenticate", true);

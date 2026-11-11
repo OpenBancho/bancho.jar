@@ -102,7 +102,7 @@ public final class TokenHandler implements Handler {
 
         if (user == null || user.getPasswordHash() == null || !checkPassword(user, passwordMd5)) {
             // Deliberately identical for unknown users and wrong passwords.
-            logger.warn("Rejected a token request for <{}> from <{}>", username, ctx.ip());
+            logger.warn("Rejected a token request for <{}> from <{}>", username, com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             oauthError(ctx, 401, "invalid_grant", "Invalid credentials.");
             return;
         }
@@ -111,7 +111,7 @@ public final class TokenHandler implements Handler {
         String clientId = params.get("client_id");
 
         TokenStore.TokenPair pair = TokenStore.issue(user.getId(), user.getName(),
-                user.getPrivileges(), scope, clientId, ctx.ip());
+                user.getPrivileges(), scope, clientId, com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         if (pair == null) {
             oauthError(ctx, 503, "temporarily_unavailable", "Could not issue a token.");
@@ -119,7 +119,7 @@ public final class TokenHandler implements Handler {
         }
 
         logger.info("Issued a token pair to user <{}> from <{}> (scope: {})",
-                user.getId(), ctx.ip(), pair.getScope());
+                user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx), pair.getScope());
 
         respond(ctx, pair);
     }
@@ -137,7 +137,7 @@ public final class TokenHandler implements Handler {
             return;
         }
 
-        TokenStore.RefreshResult result = TokenStore.refresh(presented, ctx.ip());
+        TokenStore.RefreshResult result = TokenStore.refresh(presented, com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         if (!result.isSuccess()) {
             switch (result.getError()) {

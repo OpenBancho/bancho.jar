@@ -179,7 +179,7 @@ public final class TwoFactorHandler implements Handler {
 
         if (!TotpService.verify(pending, code)) {
             logger.warn("Rejected a 2FA setup for user <{}> from <{}>: wrong code",
-                    user.getId(), ctx.ip());
+                    user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             ApiAuth.badRequest(ctx, "That code does not match. Check your device's clock and try the next one.");
             return;
         }
@@ -191,7 +191,7 @@ public final class TwoFactorHandler implements Handler {
         // A machine trusted under an older secret has proven nothing about this one.
         TwoFactorService.forgetDevices(user.getId());
 
-        logger.info("User <{}> turned two factor authentication on from <{}>", user.getId(), ctx.ip());
+        logger.info("User <{}> turned two factor authentication on from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         Map<String, Object> response = ApiAuth.success();
         response.put("enabled", true);
@@ -239,7 +239,7 @@ public final class TwoFactorHandler implements Handler {
         if (!TotpService.verify(user.getTotpSecret(), code)) {
             TwoFactorService.countFailure(bucket);
 
-            logger.warn("Rejected a 2FA code for user <{}> from <{}>", user.getId(), ctx.ip());
+            logger.warn("Rejected a 2FA code for user <{}> from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             ApiAuth.badRequest(ctx, "That code does not match. Check your device's clock and try the next one.");
             return;
         }
@@ -272,7 +272,7 @@ public final class TwoFactorHandler implements Handler {
         TwoFactorService.clearPending(user.getId());
         TwoFactorService.forgetDevices(user.getId());
 
-        logger.info("User <{}> turned two factor authentication off from <{}>", user.getId(), ctx.ip());
+        logger.info("User <{}> turned two factor authentication off from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         Map<String, Object> response = ApiAuth.success();
         response.put("enabled", false);

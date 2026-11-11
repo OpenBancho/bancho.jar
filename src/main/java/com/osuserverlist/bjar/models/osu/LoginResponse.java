@@ -60,7 +60,7 @@ public class LoginResponse {
         response.uuid = UUID.randomUUID().toString();
         response.username = body[0];
         response.passwordMd5 = body[1];
-        response.ip = ctx.header("X-Real-IP");
+        response.ip = com.osuserverlist.bjar.modules.util.ClientIp.of(ctx);
 
         String[] clientInfo = body[2].split("\\|");
 

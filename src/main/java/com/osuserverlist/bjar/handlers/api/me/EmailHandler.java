@@ -113,7 +113,7 @@ public final class EmailHandler implements Handler {
         user.setEmail(trimmed);
         UserRepository.save(user);
 
-        logger.info("User <{}> changed their email from <{}>", user.getId(), ctx.ip());
+        logger.info("User <{}> changed their email from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         ctx.json(ApiAuth.success());
     }

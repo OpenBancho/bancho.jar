@@ -155,7 +155,7 @@ public final class PasswordResetHandler implements Handler {
         }
 
         logger.info("User <{}> reset their password from <{}> with a ticket issued by <{}>",
-                user.getId(), ctx.ip(), ticket.getIssuedBy());
+                user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx), ticket.getIssuedBy());
 
         Map<String, Object> response = ApiAuth.success();
         response.put("username", user.getName());

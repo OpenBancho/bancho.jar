@@ -83,7 +83,7 @@ final class MeSupport {
 
         if (user.getPasswordHash() == null || !checkPassword(user, passwordMd5)) {
             logger.warn("Rejected an account change for user <{}> from <{}>: wrong password",
-                    user.getId(), ctx.ip());
+                    user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             ApiAuth.unauthorized(ctx, "invalid_grant", "The current password is incorrect.");
             return null;
         }

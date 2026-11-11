@@ -174,7 +174,7 @@ public final class NameHandler implements Handler {
         }
 
         logger.info("User <{}> changed their name from <{}> to <{}> from <{}>",
-                user.getId(), previous, name, ctx.ip());
+                user.getId(), previous, name, com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
 
         ctx.json(ApiAuth.success());
     }

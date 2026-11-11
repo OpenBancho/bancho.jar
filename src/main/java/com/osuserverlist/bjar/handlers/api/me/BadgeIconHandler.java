@@ -172,7 +172,7 @@ public final class BadgeIconHandler implements Handler {
             ctx.json(response);
 
             MeSupport.logger.info("User <{}> updated their badge picture from <{}>",
-                    user.getId(), ctx.ip());
+                    user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
         } catch (IOException e) {
             MeSupport.logger.error("Could not store the badge picture of user <{}>",
                     user.getId(), e);
