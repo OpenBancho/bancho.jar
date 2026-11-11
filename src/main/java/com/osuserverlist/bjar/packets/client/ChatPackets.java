@@ -138,6 +138,10 @@ public class ChatPackets {
         String message = reader.readString();
         String target = reader.readString();
 
+        if (!player.canChat()) {
+            return true;
+        }
+
         logger.info("Private Message from <{}>: <{}> to <{}>", player.getUsername(), message, target);
 
         Player targetPlayer = App.server.playerManager.getByFilter(p -> p.getUsername().equalsIgnoreCase(target));
