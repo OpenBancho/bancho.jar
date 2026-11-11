@@ -245,19 +245,16 @@ public final class TwoFactorService {
             return;
         }
 
-        String raw = read(ATTEMPTS_PREFIX + fingerprint);
+        // INCR is atomic, so parallel guesses cannot all be counted as the same attempt.
+        try {
+            long attempts = Redis.getClient().incr(ATTEMPTS_PREFIX + fingerprint);
 
-        int attempts = 0;
-
-        if (raw != null && !raw.isBlank()) {
-            try {
-                attempts = Integer.parseInt(raw.trim());
-            } catch (NumberFormatException e) {
-                attempts = 0;
+            if (attempts == 1) {
+                Redis.getClient().expire(ATTEMPTS_PREFIX + fingerprint, ATTEMPTS_TTL_SECONDS);
             }
+        } catch (Exception e) {
+            logger.error("Failed to count a 2FA failure", e);
         }
-
-        write(ATTEMPTS_PREFIX + fingerprint, String.valueOf(attempts + 1), ATTEMPTS_TTL_SECONDS);
     }
 
     /**

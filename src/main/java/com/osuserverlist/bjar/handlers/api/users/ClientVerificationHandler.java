@@ -111,14 +111,25 @@ public final class ClientVerificationHandler implements Handler {
             return;
         }
 
+        // The client hash is chosen by the caller, so a new one would restart the count: the account is limited too.
+        String accountBucket = "user:" + user.getId();
+
+        if (TwoFactorService.tooManyFailures(accountBucket)) {
+            logger.warn("Too many wrong 2FA codes for user <{}>", user.getId());
+            ApiAuth.badRequest(ctx, "Too many wrong codes. Try again later.");
+            return;
+        }
+
         if (!TotpService.verify(user.getTotpSecret(), code)) {
             TwoFactorService.countFailure(fingerprint);
+            TwoFactorService.countFailure(accountBucket);
 
             logger.warn("Wrong 2FA code for user <{}> from <{}>", user.getId(), com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             ApiAuth.badRequest(ctx, "That code does not match. Wait for the next one and try again.");
             return;
         }
 
+        TwoFactorService.clearFailures(accountBucket);
         TwoFactorService.trust(user.getId(), fingerprint);
         TwoFactorService.closeChallenge(fingerprint);
 
