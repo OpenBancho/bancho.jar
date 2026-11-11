@@ -70,6 +70,15 @@ public class IrcServer {
         while (running) {
             try {
                 Socket socket = serverSocket.accept();
+
+                String address = socket.getInetAddress() == null ? "" : socket.getInetAddress().getHostAddress();
+                long fromAddress = clients.stream().filter(c -> c.remoteIp().equals(address)).count();
+
+                if (clients.size() >= 500 || fromAddress >= 10) {
+                    socket.close();
+                    continue;
+                }
+
                 IrcClient client = new IrcClient(this, socket);
                 clients.add(client);
                 Thread.ofVirtual()

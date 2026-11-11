@@ -85,6 +85,8 @@ public class IrcClient implements Runnable {
     public void run() {
         try {
             socket.setTcpNoDelay(true);
+            // An unregistered connection that stays silent is dropped; the server pings registered ones every minute.
+            socket.setSoTimeout(60_000);
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
@@ -92,7 +94,7 @@ public class IrcClient implements Runnable {
                     new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
             String line;
-            while ((line = in.readLine()) != null) {
+            while ((line = readBoundedLine(in)) != null) {
                 line = line.trim();
                 if (line.isEmpty()) {
                     continue;
@@ -118,6 +120,35 @@ public class IrcClient implements Runnable {
             cleanup();
         }
     }
+
+    /** A line of at most 2048 characters; a longer one (or no end of line at all) ends the connection. */
+    private static String readBoundedLine(BufferedReader in) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int c;
+
+        while ((c = in.read()) != -1) {
+            if (c == '\n') {
+                return sb.toString();
+            }
+
+            if (c != '\r') {
+                sb.append((char) c);
+            }
+
+            if (sb.length() > 2048) {
+                throw new IOException("IRC line too long");
+            }
+        }
+
+        return sb.length() > 0 ? sb.toString() : null;
+    }
+
+    String remoteIp() {
+        return socket.getInetAddress() == null ? "" : socket.getInetAddress().getHostAddress();
+    }
+
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter IRC_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(10, 15 * 60_000L);
 
     private void cleanup() {
         closeConnection("Connection closed");
@@ -384,12 +415,32 @@ public class IrcClient implements Runnable {
             user = UserRepository.findByName(pendingNick);
         }
 
+        String ipKey = "ip:" + remoteIp();
+        String nickKey = "nick:" + pendingNick.toLowerCase();
+
+        if (IRC_LIMIT.isBlocked(ipKey) || IRC_LIMIT.isBlocked(nickKey)) {
+            sendNumeric("464", ":Too many failed attempts.");
+            closeConnection("Too many failed attempts");
+            return;
+        }
+
         if (user == null || !checkPassword(user, pendingPass)) {
+            IRC_LIMIT.record(ipKey);
+            IRC_LIMIT.record(nickKey);
             logger.warn("Failed IRC login attempt for <{}> from {}", pendingNick, socket.getRemoteSocketAddress());
             sendNumeric("464", ":Bad authentication token.");
             closeConnection("Bad authentication token");
             return;
         }
+
+        // The authenticator code cannot be asked for here, so a password alone must not open an account that has 2FA.
+        if (com.osuserverlist.bjar.modules.account.TotpService.enabled(user.getTotpSecret())) {
+            sendNumeric("464", ":Accounts with two factor authentication cannot use IRC.");
+            closeConnection("Two factor accounts cannot use IRC");
+            return;
+        }
+
+        IRC_LIMIT.reset(nickKey);
 
         Server server = App.server;
 
@@ -415,6 +466,12 @@ public class IrcClient implements Runnable {
 
         server.playerManager.add(player);
         registered = true;
+
+        try {
+            socket.setSoTimeout(5 * 60_000);
+        } catch (java.net.SocketException ignored) {
+            // keep the shorter timeout
+        }
 
         // Make the IRC user visible to osu! clients.
         for (Player other : server.playerManager.getAllSessions()) {
