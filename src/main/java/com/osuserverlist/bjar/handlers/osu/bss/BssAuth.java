@@ -21,6 +21,9 @@ import io.javalin.http.Context;
  */
 final class BssAuth {
 
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(10, 15 * 60_000L);
+
     /**
      * @param username    osu! username, parameter {@code u}.
      * @param passwordMd5 MD5 of the password, parameter {@code h}.
@@ -37,20 +40,35 @@ final class BssAuth {
             return player.getEntity();
         }
 
+        String key = "user:" + username.trim().toLowerCase();
+
+        if (LIMIT.isBlocked(key)) {
+            return null;
+        }
+
         UserEntity user = UserRepository.findByName(username);
 
         if (user == null || user.getPasswordHash() == null) {
+            LIMIT.record(key);
+            return null;
+        }
+
+        // Without a live game session there is no way to ask for the authenticator code, so 2FA accounts are refused here.
+        if (com.osuserverlist.bjar.modules.account.TotpService.enabled(user.getTotpSecret())) {
             return null;
         }
 
         try {
             if (OpenBSDBCrypt.checkPassword(user.getPasswordHash(), passwordMd5.toCharArray())) {
+                LIMIT.reset(key);
                 return user;
             }
         } catch (Exception e) {
+            LIMIT.record(key);
             return null;
         }
 
+        LIMIT.record(key);
         return null;
     }
 
