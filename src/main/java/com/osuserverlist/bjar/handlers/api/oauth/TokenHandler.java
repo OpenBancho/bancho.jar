@@ -34,6 +34,11 @@ import static com.osuserverlist.bjar.handlers.api.oauth.OAuthSupport.oauthError;
 @WebEngine.HttpMethod("POST")
 public final class TokenHandler implements Handler {
 
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter IP_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(30, 15 * 60_000L);
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter USER_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(10, 15 * 60_000L);
+
     @Override
     @OpenApi(
         summary = "Issue or refresh tokens",
@@ -98,14 +103,27 @@ public final class TokenHandler implements Handler {
             passwordMd5 = md5Hex(password);
         }
 
+        String ip = com.osuserverlist.bjar.modules.util.ClientIp.of(ctx);
+        String userKey = "user:" + username.trim().toLowerCase();
+
+        if (IP_LIMIT.isBlocked("ip:" + ip) || USER_LIMIT.isBlocked(userKey)) {
+            ctx.header("Retry-After", "900");
+            oauthError(ctx, 429, "too_many_requests", "Too many failed attempts. Try again in 15 minutes.");
+            return;
+        }
+
         UserEntity user = UserRepository.findByName(username.trim());
 
         if (user == null || user.getPasswordHash() == null || !checkPassword(user, passwordMd5)) {
+            IP_LIMIT.record("ip:" + ip);
+            USER_LIMIT.record(userKey);
             // Deliberately identical for unknown users and wrong passwords.
             logger.warn("Rejected a token request for <{}> from <{}>", username, com.osuserverlist.bjar.modules.util.ClientIp.of(ctx));
             oauthError(ctx, 401, "invalid_grant", "Invalid credentials.");
             return;
         }
+
+        USER_LIMIT.reset(userKey);
 
         String scope = params.get("scope");
         String clientId = params.get("client_id");

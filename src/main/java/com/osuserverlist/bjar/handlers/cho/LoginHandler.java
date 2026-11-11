@@ -68,6 +68,12 @@ public class LoginHandler {
 
     private static final int LOGIN_FAILED = -1;
 
+    /** Failed logins per 15 minutes: 30 per address (players share addresses behind a NAT), 10 per account. */
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter IP_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(30, 15 * 60_000L);
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter USER_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(10, 15 * 60_000L);
+
     /**
      * Sends the client into its own account verification flow: it opens
      * {@code osu.<domain>/client-verifications/create?ch=<client hash>} in the player's browser
@@ -80,8 +86,17 @@ public class LoginHandler {
     public void handle(Context ctx) {
         LoginResponse loginResponse = LoginResponse.parse(ctx);
 
-        if (!loginResponse.isSuccess()) {
+        if (loginResponse == null || !loginResponse.isSuccess()) {
             sendLoginFailure(ctx, LOGIN_FAILED);
+            return;
+        }
+
+        String loginIp = com.osuserverlist.bjar.modules.util.ClientIp.of(ctx);
+        String loginUserKey = "user:" + loginResponse.getUsername().trim().toLowerCase();
+
+        if (IP_LIMIT.isBlocked("ip:" + loginIp) || USER_LIMIT.isBlocked(loginUserKey)) {
+            logger.warn("Login rate limit hit: user <{}> ip <{}>", loginResponse.getUsername(), loginIp);
+            sendLoginRefusal(ctx, "Too many failed login attempts. Try again in 15 minutes.");
             return;
         }
 
@@ -92,9 +107,12 @@ public class LoginHandler {
 
         UserEntity userEntity = authenticate(loginResponse);
         if (userEntity == null) {
+            IP_LIMIT.record("ip:" + loginIp);
+            USER_LIMIT.record(loginUserKey);
             sendLoginFailure(ctx, LOGIN_FAILED);
             return;
         }
+        USER_LIMIT.reset(loginUserKey);
 
         // One account, one game client: whoever got in first (stable or lazer) keeps the account until
         // they leave. Tournament clients open several sessions by design and are exempt.
@@ -178,9 +196,14 @@ public class LoginHandler {
             return null;
         }
 
-        boolean passwordMatches = OpenBSDBCrypt.checkPassword(
-                userEntity.getPasswordHash(),
-                loginResponse.getPasswordMd5().toCharArray());
+        boolean passwordMatches;
+        try {
+            passwordMatches = OpenBSDBCrypt.checkPassword(
+                    userEntity.getPasswordHash(),
+                    loginResponse.getPasswordMd5().toCharArray());
+        } catch (RuntimeException e) {
+            passwordMatches = false;
+        }
 
         if (!passwordMatches) {
             logger.warn("Failed login attempt for user: {} from IP: {}",
