@@ -22,6 +22,10 @@ import io.javalin.http.UploadedFile;
 @HttpMethod("POST")
 public class OsuUploadScreenshotHandler implements Handler {
 
+    /** 20 screenshots per player and hour. */
+    private static final com.osuserverlist.bjar.modules.util.RateLimiter SHOT_LIMIT =
+            new com.osuserverlist.bjar.modules.util.RateLimiter(20, 60 * 60_000L);
+
     @Override
     public void handle(@NotNull Context ctx) throws Exception {
         String username = ctx.formParamAsClass("u", String.class).required().get();
@@ -32,6 +36,13 @@ public class OsuUploadScreenshotHandler implements Handler {
 
         if (player == null) {
             ctx.status(401).result("Invalid credentials.");
+            return;
+        }
+
+        String shotKey = "player:" + player.getId();
+
+        if (SHOT_LIMIT.isBlocked(shotKey)) {
+            ctx.status(429).result("Too many screenshots.");
             return;
         }
 
@@ -68,6 +79,8 @@ public class OsuUploadScreenshotHandler implements Handler {
             ctx.status(400).result("Unsupported screenshot format. Only PNG and JPEG are allowed.");
             return;
         }
+
+        SHOT_LIMIT.record(shotKey);
 
         File screenshotPath = new File("data/ss/" + UUID.randomUUID() + "." + extension);
         Files.write(screenshotPath.toPath(), bytes);
