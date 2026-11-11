@@ -182,6 +182,15 @@ public final class PrivilegesHandler {
             privileges.add(resolved);
         }
 
+        com.osuserverlist.bjar.models.database.UserEntity target = com.osuserverlist.bjar.repos.UserRepository.findById(userId);
+        int targetPrivileges = target == null || target.getPrivileges() == null ? 0 : target.getPrivileges();
+
+        if (!com.osuserverlist.bjar.modules.admin.AdminPrivileges.mayChange(session.getPrivileges(), targetPrivileges, privileges)) {
+            ctx.status(403).json(com.osuserverlist.bjar.models.api.ApiPagination
+                    .error("Only a developer can change administrator or developer privileges."));
+            return;
+        }
+
         int result = AdminActions.changePrivileges(session.getUserId(), userId, privileges, add);
         if (result < 0) {
             ApiAuth.notFound(ctx, "No such user.");

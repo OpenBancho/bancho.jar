@@ -37,6 +37,30 @@ public final class AdminPrivileges {
         ALIASES.put("developer", Privileges.DEVELOPER);
     }
 
+    private static final int ELEVATED = Privileges.ADMINISTRATOR.getValue() | Privileges.DEVELOPER.getValue();
+
+    /**
+     * Only a developer may hand out or take away administrator / developer rights, and only a developer may
+     * touch an account that already holds one of them. Otherwise any administrator could make themselves a developer.
+     */
+    public static boolean mayChange(int actorPrivileges, int targetPrivileges, java.util.List<Privileges> changes) {
+        if ((actorPrivileges & Privileges.DEVELOPER.getValue()) != 0) {
+            return true;
+        }
+
+        if ((targetPrivileges & ELEVATED) != 0) {
+            return false;
+        }
+
+        for (Privileges change : changes) {
+            if ((change.getValue() & ELEVATED) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Resolves a privilege name sent by a client.
      *

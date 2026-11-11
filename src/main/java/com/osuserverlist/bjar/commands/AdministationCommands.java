@@ -36,10 +36,10 @@ public class AdministationCommands extends BanchoCommandHandler {
 
         switch (subCommand) {
             case "add":
-                handlePrivilegeChange(session, remainingArgs, true);
+                handlePrivilegeChange(sender, session, remainingArgs, true);
                 break;
             case "remove":
-                handlePrivilegeChange(session, remainingArgs, false);
+                handlePrivilegeChange(sender, session, remainingArgs, false);
                 break;
             default:
                 session.sendAnswer(PRIV_USAGE);
@@ -73,7 +73,7 @@ public class AdministationCommands extends BanchoCommandHandler {
         }
     }
 
-    private void handlePrivilegeChange(Session session, String[] args, boolean grant) {
+    private void handlePrivilegeChange(Player sender, Session session, String[] args, boolean grant) {
         if (args.length < 2) {
             session.sendAnswer(PRIV_USAGE);
             return;
@@ -85,6 +85,15 @@ public class AdministationCommands extends BanchoCommandHandler {
 
         if (privilege == null) {
             session.sendAnswer(invalidPrivilegeMessage(privName));
+            return;
+        }
+
+        UserEntity targetUser = UserRepository.findByName(username);
+        int targetPrivileges = targetUser == null || targetUser.getPrivileges() == null ? 0 : targetUser.getPrivileges();
+
+        if (!com.osuserverlist.bjar.modules.admin.AdminPrivileges.mayChange(
+                sender.getServerPrivileges(), targetPrivileges, java.util.List.of(privilege))) {
+            session.sendAnswer("Only a developer can change administrator or developer privileges.");
             return;
         }
 
