@@ -108,6 +108,10 @@ public final class NameHandler implements Handler {
             return;
         }
 
+        if (!com.osuserverlist.bjar.handlers.api.me.MeSupport.requireSecondFactor(ctx, user, body)) {
+            return;
+        }
+
         if (!DonorService.isDonor(user)) {
             ctx.status(403).json(ApiPagination.error("A username change is a supporter perk."));
             return;

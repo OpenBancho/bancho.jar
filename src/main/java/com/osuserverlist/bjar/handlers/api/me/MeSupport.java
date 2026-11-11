@@ -91,6 +91,39 @@ final class MeSupport {
         return user;
     }
 
+    /**
+     * For accounts with an authenticator: a valid code is needed on top of the password before a sensitive change.
+     * Accounts without 2FA pass straight through. Writes the answer and returns {@code false} when refused.
+     */
+    static boolean requireSecondFactor(Context ctx, UserEntity user, JsonNode body) {
+        if (!com.osuserverlist.bjar.modules.account.TotpService.enabled(user.getTotpSecret())) {
+            return true;
+        }
+
+        String bucket = "user:" + user.getId();
+
+        if (com.osuserverlist.bjar.modules.account.TwoFactorService.tooManyFailures(bucket)) {
+            ApiAuth.badRequest(ctx, "Too many wrong codes. Wait an hour before trying again.");
+            return false;
+        }
+
+        String code = ApiAuth.stringField(body, "code");
+
+        if (code == null) {
+            ApiAuth.unauthorized(ctx, "two_factor_required", "A code from your authenticator is required.");
+            return false;
+        }
+
+        if (!com.osuserverlist.bjar.modules.account.TotpService.verify(user.getTotpSecret(), code)) {
+            com.osuserverlist.bjar.modules.account.TwoFactorService.countFailure(bucket);
+            ApiAuth.unauthorized(ctx, "invalid_grant", "That authenticator code does not match.");
+            return false;
+        }
+
+        com.osuserverlist.bjar.modules.account.TwoFactorService.clearFailures(bucket);
+        return true;
+    }
+
     /** Every live bancho session belonging to an account. */
     static List<Player> sessionsOf(int userId) {
         List<Player> sessions = new ArrayList<>();

@@ -103,6 +103,10 @@ public final class DeleteHandler implements Handler {
             return;
         }
 
+        if (!com.osuserverlist.bjar.handlers.api.me.MeSupport.requireSecondFactor(ctx, user, body)) {
+            return;
+        }
+
         // Deliberately awkward: this cannot be undone.
         if (!ApiAuth.booleanField(body, "confirm", false)) {
             ApiAuth.badRequest(ctx, "Set confirm to true to delete the account.");

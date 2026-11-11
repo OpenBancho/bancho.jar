@@ -98,6 +98,10 @@ public final class PasswordHandler implements Handler {
             return;
         }
 
+        if (!com.osuserverlist.bjar.handlers.api.me.MeSupport.requireSecondFactor(ctx, user, body)) {
+            return;
+        }
+
         String password = ApiAuth.stringField(body, "new_password");
         if (password == null) {
             ApiAuth.badRequest(ctx, "A new_password is required.");

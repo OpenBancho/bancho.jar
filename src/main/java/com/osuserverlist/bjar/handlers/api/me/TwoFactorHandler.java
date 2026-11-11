@@ -258,6 +258,10 @@ public final class TwoFactorHandler implements Handler {
             return;
         }
 
+        if (!com.osuserverlist.bjar.handlers.api.me.MeSupport.requireSecondFactor(ctx, user, body)) {
+            return;
+        }
+
         if (!TotpService.enabled(user.getTotpSecret())) {
             Map<String, Object> already = new LinkedHashMap<>(ApiAuth.success());
             already.put("enabled", false);

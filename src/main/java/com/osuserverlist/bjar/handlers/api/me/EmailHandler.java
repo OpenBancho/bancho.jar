@@ -90,6 +90,10 @@ public final class EmailHandler implements Handler {
             return;
         }
 
+        if (!com.osuserverlist.bjar.handlers.api.me.MeSupport.requireSecondFactor(ctx, user, body)) {
+            return;
+        }
+
         String email = ApiAuth.stringField(body, "email");
         if (email == null) {
             ApiAuth.badRequest(ctx, "An email is required.");
